@@ -37,6 +37,14 @@ public:
          Sum_Product    = 0.0;
          Sum_Lot        = 0.0;
       }
+      void           Decimal()
+      {
+         //CNT_Avtive     = 0;
+         //CNT_Pending    = 0;
+         Sum_ActiveHold = NormalizeDouble(Sum_ActiveHold, 2);
+         Sum_Product    = NormalizeDouble(Sum_Product, _Digits);
+         Sum_Lot        = NormalizeDouble(Sum_Lot, 2);
+      }
    };
    SOrder            Buy, Sell, All;
 
@@ -55,16 +63,38 @@ public:
    bool              Order_Callculator()
    {
       All.Clear();
+      //---
 
-      All.Sum_ActiveHold += AccountInfoDouble(ACCOUNT_PROFIT);
+      /* Mock Data*/
+      int   __EA_Magic  =  123;
+      //---
 
-      All.CNT_Avtive  = PositionsTotal();
+      All.Sum_ActiveHold = AccountInfoDouble(ACCOUNT_PROFIT);
 
-      All.CNT_Pending = OrdersTotal();
+      int   __Port_CNT_Avtive  = PositionsTotal();
+      {/* For Active loop*/
+         for(int i = 0; i < __Port_CNT_Avtive; i++) {
+
+            if(PositionGetSymbol(i) != _Symbol)    continue;
+
+            ulong  _PositionGetTicket = PositionGetTicket(i);
+            if(_PositionGetTicket != 0) {
+            Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
+
+            }
+
+         }
+      }
+
+
+
+      int   __Port_CNT_Pending = OrdersTotal();
+      {/* For Pending loop*/}
 
       //Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
 
       //---
+      All.Decimal();
       return   true;
    }
 };

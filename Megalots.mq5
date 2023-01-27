@@ -22,7 +22,7 @@ int OnInit()
    Print(__FUNCTION__"#", __LINE__, " test : ", test);
 
    Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
-
+ Port.Order_Callculator();
 //---
    return(INIT_SUCCEEDED);
 }
@@ -42,7 +42,7 @@ void OnDeinit(const int reason)
 void OnTick()
 {
 //---
-   Port.Order_Callculator();
+   //Port.Order_Callculator();
 
 //Print(__FUNCTION__"#", __LINE__, " All.Sum_ActiveHold : ", Port.All.Sum_ActiveHold);
 

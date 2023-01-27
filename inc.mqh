@@ -50,9 +50,9 @@ public:
 
                      CPort()
    {
-      Order_Callculator();
+      Print(__FUNCTION__"#", __LINE__);
 
-      Print(__FUNCTION__"#", __LINE__, " Buy.CNT_Avtive : ", Buy.CNT_Avtive);
+      Order_Callculator();
    };
                     ~CPort()
    {
@@ -62,14 +62,16 @@ public:
 
    bool              Order_Callculator()
    {
+      Buy.Clear();
+      Sell.Clear();
       All.Clear();
       //---
 
+
       /* Mock Data*/
-      int   __EA_Magic  =  123;
+      int   __EA_Magic  =  0;
       //---
 
-      All.Sum_ActiveHold = AccountInfoDouble(ACCOUNT_PROFIT);
 
       int   __Port_CNT_Avtive  = PositionsTotal();
       {/* For Active loop*/
@@ -78,22 +80,52 @@ public:
             if(PositionGetSymbol(i) != _Symbol)    continue;
 
             ulong  _PositionGetTicket = PositionGetTicket(i);
-            if(_PositionGetTicket != 0) {
-            Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
+            if(_PositionGetTicket != 0 &&
+               PositionSelectByTicket(_PositionGetTicket)) {
 
+               Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
+
+               long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
+               if(__POSITION_MAGIC == __EA_Magic) {
+
+                  long     __POSITION_TYPE      = PositionGetInteger(POSITION_TYPE);
+
+                  double   __POSITION_PROFIT       = PositionGetDouble(POSITION_PROFIT);
+                  double   __POSITION_VOLUME       = PositionGetDouble(POSITION_VOLUME);
+                  double   __POSITION_PRICE_OPEN   = PositionGetDouble(POSITION_PRICE_OPEN);
+
+                  if(__POSITION_TYPE == POSITION_TYPE_BUY) {
+
+                     Buy.CNT_Avtive++;
+                     Buy.Sum_ActiveHold += __POSITION_PROFIT;
+                  }
+                  if(__POSITION_TYPE == POSITION_TYPE_SELL) {
+
+                     Sell.CNT_Avtive++;
+                     Sell.Sum_ActiveHold += __POSITION_PROFIT;
+                  }
+
+                  //
+                  All.Sum_ActiveHold = __POSITION_PROFIT;
+
+               }
             }
-
          }
-      }
-
-
+      }/*End : For Active loop*/
 
       int   __Port_CNT_Pending = OrdersTotal();
       {/* For Pending loop*/}
 
+
+
+
+
+
       //Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
 
       //---
+      Buy.Decimal();
+      Sell.Decimal();
       All.Decimal();
       return   true;
    }

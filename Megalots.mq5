@@ -17,7 +17,12 @@ int OnInit()
 //--- create timer
    EventSetTimer(60);
 
-   Print(__FUNCTION__, __LINE__, " test : ", test);
+   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
+
+   Print(__FUNCTION__"#", __LINE__, " test : ", test);
+
+   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
+
 //---
    return(INIT_SUCCEEDED);
 }
@@ -28,6 +33,7 @@ void OnDeinit(const int reason)
 {
 //--- destroy timer
    EventKillTimer();
+   Print(__FUNCTION__"#", __LINE__, " ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
 
 }
 //+------------------------------------------------------------------+
@@ -36,7 +42,13 @@ void OnDeinit(const int reason)
 void OnTick()
 {
 //---
+   Port.Order_Callculator();
 
+//Print(__FUNCTION__"#", __LINE__, " All.Sum_ActiveHold : ", Port.All.Sum_ActiveHold);
+
+   string   CMM = "";
+   CMM += "Port.All.Sum_ActiveHold" + " : " + Port.All.Sum_ActiveHold;
+   Comment(CMM);
 }
 //+------------------------------------------------------------------+
 //| Timer function                                                   |

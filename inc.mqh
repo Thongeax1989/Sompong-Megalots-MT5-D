@@ -74,21 +74,25 @@ public:
 
 
       int   __Port_CNT_Avtive  = PositionsTotal();
-      {/* For Active loop*/
+      if(false) { /* For Active loop*/
+
+         Print(__FUNCTION__"#", __LINE__);      // Dev Debug
+
          for(int i = 0; i < __Port_CNT_Avtive; i++) {
 
             if(PositionGetSymbol(i) != _Symbol)    continue;
 
             ulong  _PositionGetTicket = PositionGetTicket(i);
             if(_PositionGetTicket != 0 &&
-               PositionSelectByTicket(_PositionGetTicket)) {
+               PositionSelectByTicket(_PositionGetTicket)) {         //*Select fillter
 
-               Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
+               //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
 
                long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-               if(__POSITION_MAGIC == __EA_Magic) {
+               if(__POSITION_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
 
                   long     __POSITION_TYPE      = PositionGetInteger(POSITION_TYPE);
+                  //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket, " | __POSITION_TYPE : ", __POSITION_TYPE);
 
                   double   __POSITION_PROFIT       = PositionGetDouble(POSITION_PROFIT);
                   double   __POSITION_VOLUME       = PositionGetDouble(POSITION_VOLUME);
@@ -111,24 +115,54 @@ public:
                }
             }
          }
-      }/*End : For Active loop*/
+      }/*End : For Active loop + Module*/
+
+
 
       int   __Port_CNT_Pending = OrdersTotal();
-      {/* For Pending loop*/}
+      if(false) { /* For Pending loop*/
+
+         Print(__FUNCTION__"#", __LINE__);      // Dev Debug
+
+         for(int i = 0; i < __Port_CNT_Pending; i++) {
+
+            ulong    _OrderGetTicket = OrderGetTicket(i);
+
+            if(_OrderGetTicket != 0 &&
+               OrderSelect( _OrderGetTicket)) {
+
+               Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
+
+               long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
+               if(__ORDER_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+
+                  long     __POSITION_TYPE      = PositionGetInteger(POSITION_TYPE);
+                  //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket, " | __POSITION_TYPE : ", __POSITION_TYPE);
+
+                  double   __POSITION_PROFIT       = PositionGetDouble(POSITION_PROFIT);
+                  double   __POSITION_VOLUME       = PositionGetDouble(POSITION_VOLUME);
+                  double   __POSITION_PRICE_OPEN   = PositionGetDouble(POSITION_PRICE_OPEN);
+
+               }
+
+            }
 
 
+         }
+
+      }/*End : For Active loop + Module*/
 
 
+//Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
 
-
-      //Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
-
-      //---
+//---
       Buy.Decimal();
       Sell.Decimal();
       All.Decimal();
-      return   true;
+      return            true;
    }
 };
 CPort Port  =  new CPort;
+//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+

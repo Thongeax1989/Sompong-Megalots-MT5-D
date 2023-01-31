@@ -46,14 +46,14 @@ void OnTick()
 //Print(__FUNCTION__"#", __LINE__, " All.Sum_ActiveHold : ", Port.All.Sum_ActiveHold);
 
    string   CMM = "";
-   CMM += "Port.All.Sum_ActiveHold" + " : " + Port.All.Sum_ActiveHold + "\n";
-   CMM += "Port.All.Sum_ActiveHold" + " : " + Port.Buy.Sum_ActiveHold + "\n";
-   CMM += "Port.All.Sum_ActiveHold" + " : " + Port.Sell.Sum_ActiveHold + "\n";
+   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.All.Sum_ActiveHold,2) + "\n";
+   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.Buy.Sum_ActiveHold,2) + "\n";
+   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.Sell.Sum_ActiveHold,2) + "\n";
    CMM += "\n";
 
-   CMM += "Port.Buy.CNT_Pending" + " : " + Port.Buy.CNT_Pending + "\n";
-   CMM += "Port.Sell.CNT_Pending" + " : " + Port.Sell.CNT_Pending + "\n";
-   CMM += "Port.All.CNT_Pending" + " : " + Port.All.CNT_Pending + "\n";
+   CMM += "Port.Buy.CNT_Pending" + " : " + IntegerToString(Port.Buy.CNT_Pending) + "\n";
+   CMM += "Port.Sell.CNT_Pending" + " : " +  IntegerToString(Port.Sell.CNT_Pending) + "\n";
+   CMM += "Port.All.CNT_Pending" + " : " +  IntegerToString(Port.All.CNT_Pending) + "\n";
 
    Comment(CMM);
   }

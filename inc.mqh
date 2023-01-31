@@ -75,10 +75,10 @@ class CPort
 
 
          int   __Port_CNT_Avtive  = PositionsTotal();
-         if(false)   /* For Active loop*/
+         if(true)   /* For Active loop*/
            {
 
-            Print(__FUNCTION__"#", __LINE__);      // Dev Debug
+            //Print(__FUNCTION__"#", __LINE__);      // Dev Debug
 
             for(int i = 0; i < __Port_CNT_Avtive; i++)
               {
@@ -133,7 +133,7 @@ class CPort
          if(true)   /* For Pending loop*/
            {
 
-            Print(__FUNCTION__"#", __LINE__);      // Dev Debug
+            //Print(__FUNCTION__"#", __LINE__);      // Dev Debug
 
             for(int i = 0; i < __Port_CNT_Pending; i++)
               {
@@ -151,28 +151,30 @@ class CPort
                     {
 
                      long     __ORDER_TYPE      = OrderGetInteger(ORDER_TYPE);
-                     Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket, " | __ORDER_TYPE : ", __ORDER_TYPE);
+                     //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket, " | __ORDER_TYPE : ", __ORDER_TYPE);
+
+                     All.CNT_Pending++;
 
                      switch(int(__ORDER_TYPE))
                        {
                         case  ORDER_TYPE_BUY_LIMIT:
                           {
-
+                           Buy.CNT_Pending++;
                            break;
                           }
                         case  ORDER_TYPE_BUY_STOP:
                           {
-
+                           Buy.CNT_Pending++;
                            break;
                           }
                         case  ORDER_TYPE_SELL_LIMIT:
                           {
-
+                           Sell.CNT_Pending++;
                            break;
                           }
                         case  ORDER_TYPE_SELL_STOP:
                           {
-
+                           Sell.CNT_Pending++;
                            break;
                           }
                         default:

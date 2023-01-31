@@ -13,7 +13,7 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
-{
+  {
 //--- create timer
    EventSetTimer(60);
 
@@ -24,22 +24,22 @@ int OnInit()
    Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
 //---
    return(INIT_SUCCEEDED);
-}
+  }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
-{
+  {
 //--- destroy timer
    EventKillTimer();
    Print(__FUNCTION__"#", __LINE__, " ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
 
-}
+  }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick()
-{
+  {
 //---
    Port.Order_Callculator();
 
@@ -49,72 +49,76 @@ void OnTick()
    CMM += "Port.All.Sum_ActiveHold" + " : " + Port.All.Sum_ActiveHold + "\n";
    CMM += "Port.All.Sum_ActiveHold" + " : " + Port.Buy.Sum_ActiveHold + "\n";
    CMM += "Port.All.Sum_ActiveHold" + " : " + Port.Sell.Sum_ActiveHold + "\n";
+   CMM += "\n";
 
+   CMM += "Port.Buy.CNT_Pending" + " : " + Port.Buy.CNT_Pending + "\n";
+   CMM += "Port.Sell.CNT_Pending" + " : " + Port.Sell.CNT_Pending + "\n";
+   CMM += "Port.All.CNT_Pending" + " : " + Port.All.CNT_Pending + "\n";
 
    Comment(CMM);
-}
+  }
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
 void OnTimer()
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| Trade function                                                   |
 //+------------------------------------------------------------------+
 void OnTrade()
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| TradeTransaction function                                        |
 //+------------------------------------------------------------------+
 void OnTradeTransaction(const MqlTradeTransaction& trans,
                         const MqlTradeRequest& request,
                         const MqlTradeResult& result)
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| Tester function                                                  |
 //+------------------------------------------------------------------+
 double OnTester()
-{
+  {
 //---
    double ret = 0.0;
 //---
 
 //---
    return(ret);
-}
+  }
 //+------------------------------------------------------------------+
 //| TesterInit function                                              |
 //+------------------------------------------------------------------+
 void OnTesterInit()
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| TesterPass function                                              |
 //+------------------------------------------------------------------+
 void OnTesterPass()
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| TesterDeinit function                                            |
 //+------------------------------------------------------------------+
 void OnTesterDeinit()
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| ChartEvent function                                              |
 //+------------------------------------------------------------------+
@@ -122,16 +126,16 @@ void OnChartEvent(const int id,
                   const long &lparam,
                   const double &dparam,
                   const string &sparam)
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+
 //| BookEvent function                                               |
 //+------------------------------------------------------------------+
 void OnBookEvent(const string &symbol)
-{
+  {
 //---
 
-}
+  }
 //+------------------------------------------------------------------+

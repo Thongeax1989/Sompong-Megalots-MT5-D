@@ -25,7 +25,9 @@ int OnInit()
 //---
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
 
-   Order_Select(Docker.Docker[0].TICKE_TOP_DW, Docker.Docker[0].Price_TOP_DW, retCode, __LINE__);
+//Order_Select(Docker.Docker[0].TICKE_TOP_DW, Docker.Docker[0].Price_TOP_DW, retCode, __LINE__);
+
+   Order_Place(0, 0, ORDER_TYPE_BUY);
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
 
@@ -68,8 +70,61 @@ void OnTick()
    Comment(CMM);
 
 //---
-   retCode = -1;
-//Order_Select(Docker.Docker[0].TICKE_TOP_DW, Docker.Docker[0].Price_TOP_DW, retCode, __LINE__);
+   if(true)
+      {
+
+      //if(!IsExpertEnabled()) {
+      //   Program.Running   =  false;
+      //}
+
+      retCode = -1;
+      for(int i = 0; i < Docker.Global.Docker_total; i++)
+         {
+
+         if(Order_Select(Docker.Docker[i].TICKE_TOP_DW, Docker.Docker[i].Price_TOP_DW, retCode, __LINE__))
+            {
+
+            }
+         else
+            {
+
+            Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+            }
+         //---
+         if(i != Docker.Global.Docker_total - 1)
+            {
+            if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__))
+               {
+
+               }
+            else
+               {
+               Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               }
+            }
+         //---
+         if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__))
+            {
+
+            }
+         else
+            {
+            Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+            }
+         //---
+         if(i != Docker.Global.Docker_total - 1)
+            {
+            if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__))
+               {
+
+               }
+            else
+               {
+               Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               }
+            }
+         }
+      }
 
    }
 //+------------------------------------------------------------------+
@@ -317,7 +372,9 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
    double   lot   =  -1;
    double __BID = SymbolInfoDouble(_Symbol,SYMBOL_BID);
 
-//ENUM_POSITION_TYPE OP_DIR = -1
+//--- Mock Data
+   //price = __BID + (300 * _Point);
+//---
 
    if(OP_DIR == ORDER_TYPE_BUY)
       {
@@ -351,8 +408,9 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 
 //--- checking the type of operation
 
-   request.type     = ORDER_TYPE_SELL_STOP;                          // order type
-   price = SymbolInfoDouble(Symbol(),SYMBOL_BID) - offset * point;   // price for opening
+//---
+
+   request.type     = OP_DIR;                                        // order type
    request.price    = NormalizeDouble(price,digits);                 // normalized opening price
 
 //--- send the request

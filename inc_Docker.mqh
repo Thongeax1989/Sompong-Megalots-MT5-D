@@ -54,13 +54,13 @@ class CDocker
         {
          double            Price_TOP_UP;     //OP_BUY
          double            Price_TOP_DW;     //OP_SELL
-         int               TICKE_TOP_UP;     //OP_BUY
-         int               TICKE_TOP_DW;     //OP_SELL
+         ulong             TICKE_TOP_UP;     //OP_BUY
+         ulong             TICKE_TOP_DW;     //OP_SELL
 
          double            Price_BOT_UP;     //OP_BUY
          double            Price_BOT_DW;     //OP_SELL
-         int               TICKE_BOT_UP;     //OP_BUY
-         int               TICKE_BOT_DW;     //OP_SELL
+         ulong             TICKE_BOT_UP;     //OP_BUY
+         ulong             TICKE_BOT_DW;     //OP_SELL
 
          double            Lot_Buy, Lot_Sell;
         };

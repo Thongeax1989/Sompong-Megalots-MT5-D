@@ -143,7 +143,10 @@ class CPort
                if(_OrderGetTicket != 0 &&
                      OrderSelect(_OrderGetTicket))
                   {
-
+                  if(OrderGetString(ORDER_SYMBOL) != _Symbol)
+                     {
+                     continue;
+                     }
                   //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
                   long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);

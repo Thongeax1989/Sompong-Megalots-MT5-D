@@ -15,7 +15,7 @@ https://www.mql5.com/en/articles/81    MQL4  to MQL5
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-bool  DEV_Clear   =  1;
+bool  DEV_Clear   =  0;
 int OnInit()
 {
 //--- create timer
@@ -83,7 +83,6 @@ void OnTick()
    CMM += "Port.Sell.CNT_Pending" + " : " +  IntegerToString(Port.Sell.CNT_Pending) + "\n";
    CMM += "Port.All.CNT_Pending" + " : " +  IntegerToString(Port.All.CNT_Pending) + "\n";
 
-
 //---
    if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) &&
       DEV_OneTick && !DEV_Clear) {
@@ -99,11 +98,11 @@ void OnTick()
       for(int i = 0; i < Docker.Global.Docker_total; i++) {
          //---
          if(true) {
-            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_UP" + " : " +  DoubleToString(Docker.Docker[i].TICKE_TOP_UP,_Digits) + "\n";
-            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_DW" + " : " +  DoubleToString(Docker.Docker[i].TICKE_TOP_DW,_Digits) + "\n";
+            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_UP" + " : " +  Docker.Docker[i].TICKE_TOP_UP + "\n";
+            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_DW" + " : " +  Docker.Docker[i].TICKE_TOP_DW + "\n";
 
-            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_UP" + " : " +  DoubleToString(Docker.Docker[i].TICKE_BOT_UP,_Digits) + "\n";
-            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_DW" + " : " +  DoubleToString(Docker.Docker[i].TICKE_BOT_DW,_Digits) + "\n";
+            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_UP" + " : " +  Docker.Docker[i].TICKE_BOT_UP + "\n";
+            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_DW" + " : " +  Docker.Docker[i].TICKE_BOT_DW + "\n";
 
          } else {
             CMM_Dock_UP += "Docker.Docker[" + i + "].Price_TOP_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) + "\n";
@@ -232,6 +231,8 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 
                            IsTicket_Found = false;
                         }
+                     } else {
+                        IsTicket_Found = true;
                      }
 
                      /***Mian Funtion # End***/
@@ -278,9 +279,6 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 bool  OrderDeleteAll()
 {
-   if(!DEV_Clear) {
-      return   false;
-   }
    /* Mock Data*/
    ulong   EXPERT_MAGIC  =  0;
    /* Mock Data# */

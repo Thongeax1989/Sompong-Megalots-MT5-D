@@ -12,6 +12,7 @@
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
+bool  DEV_Clear   =  true;
 int OnInit()
 {
 //--- create timer
@@ -33,7 +34,9 @@ int OnInit()
 //Order_Place(0, 0, ORDER_TYPE_BUY);
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
-
+   
+   OrderDeleteAll();
+   
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -77,7 +80,7 @@ void OnTick()
 
 
 //---
-   if(DEV_OneTick) {
+   if(DEV_OneTick && !DEV_Clear) {
 
       CMM_Dock_UP = "\n";
       CMM_Dock_DW = "\n";
@@ -103,38 +106,27 @@ void OnTick()
             Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
          }
          //---
-         if(i != Docker.Global.Docker_total - 1)
-            {
-            if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__))
-               {
+         if(i != Docker.Global.Docker_total - 1) {
+            if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__)) {
 
-               }
-            else
-               {
+            } else {
                Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-               }
             }
+         }
          //------ Mid
-         if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__))
-            {
+         if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__)) {
 
-            }
-         else
-            {
+         } else {
             Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-            }
+         }
          //---
-         if(i != Docker.Global.Docker_total - 1)
-            {
-            if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__))
-               {
+         if(i != Docker.Global.Docker_total - 1) {
+            if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__)) {
 
-               }
-            else
-               {
+            } else {
                Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-               }
             }
+         }
       }
       //DEV_OneTick  = false;
    }
@@ -252,21 +244,67 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
 
-   //--- zeroing the request and result values
+//--- zeroing the request and result values
    ZeroMemory(request);
    ZeroMemory(result);
-   //--- setting the operation parameters
+//--- setting the operation parameters
    request.action = TRADE_ACTION_REMOVE;                 // type of trade operation
    request.order = OrderDelete_Ticket;                         // order ticket
-   //--- send the request
+//--- send the request
    if(!OrderSend(request,result)) {
       PrintFormat("OrderSend error %d",GetLastError());  // if unable to send the request, output the error code
       return true;
    }
-   //--- information about the operation
+//--- information about the operation
    PrintFormat("TRADE_ACTION_REMOVE@ retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
 
    return true;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool  OrderDeleteAll()
+{
+   if(!DEV_Clear) {
+      return   false;
+   }
+   /* Mock Data*/
+   ulong   EXPERT_MAGIC  =  0;
+   /* Mock Data*/
+
+   int   __Port_CNT_Pending = OrdersTotal();
+   for(int i = 0; i < __Port_CNT_Pending; i++) {
+
+      ulong    _OrderGetTicket = OrderGetTicket(i);
+
+      if(_OrderGetTicket != 0 &&
+         OrderSelect(_OrderGetTicket)) {
+         if(OrderGetString(ORDER_SYMBOL) != _Symbol) {
+            continue;
+         }
+         //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
+
+         long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
+         if(__ORDER_MAGIC == EXPERT_MAGIC
+           ) {                        //*__EA_Magic fillter
+
+            //long     __ORDER_TYPE      = OrderGetInteger(ORDER_TYPE);
+
+            {
+               /*** Mian Funtion ***/
+               if(OrderDelete(_OrderGetTicket)) {
+                  Print(__FUNCTION__"#", __LINE__, " OrderDelete(",_OrderGetTicket);
+
+               }
+
+
+               /***Mian Funtion # End***/
+            }
+         }
+      }
+   }
+
+   return   true;
 }
 //+------------------------------------------------------------------+
 //| Timer function                                                   |

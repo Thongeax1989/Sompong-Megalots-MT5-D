@@ -32,14 +32,12 @@ int OnInit()
 //---
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
 
-//Order_Select(Docker.Docker[0].TICKE_TOP_DW, Docker.Docker[0].Price_TOP_DW, retCode, __LINE__);
-
-//Order_Place(0, 0, ORDER_TYPE_BUY);
+   OrderDeleteAll();
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
 
-   OrderDeleteAll();
 
+   OnTick();
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -72,7 +70,7 @@ void OnTick()
 //Print(__FUNCTION__"#", __LINE__, " All.Sum_ActiveHold : ", Port.All.Sum_ActiveHold);
 
    string   CMM = "";
-   CMM += "AccountInfoInteger(ACCOUNT_TRADE_EXPERT)" + " : " + bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) + "\n";
+   CMM += "AccountInfoInteger(ACCOUNT_TRADE_EXPERT)" + " : " + string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))) + "\n";
 
    CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.All.Sum_ActiveHold,2) + "\n";
    CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.Buy.Sum_ActiveHold,2) + "\n";
@@ -98,18 +96,18 @@ void OnTick()
       for(int i = 0; i < Docker.Global.Docker_total; i++) {
          //---
          if(true) {
-            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_UP" + " : " +  Docker.Docker[i].TICKE_TOP_UP + "\n";
-            CMM_Dock_UP += "Docker.Docker[" + i + "].TICKE_TOP_DW" + " : " +  Docker.Docker[i].TICKE_TOP_DW + "\n";
+            CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) +  "\n";
+            CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) +  "\n";
 
-            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_UP" + " : " +  Docker.Docker[i].TICKE_BOT_UP + "\n";
-            CMM_Dock_DW += "Docker.Docker[" + i + "].TICKE_BOT_DW" + " : " +  Docker.Docker[i].TICKE_BOT_DW + "\n";
+            CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) +  "\n";
+            CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) +  "\n";
 
          } else {
-            CMM_Dock_UP += "Docker.Docker[" + i + "].Price_TOP_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) + "\n";
-            CMM_Dock_UP += "Docker.Docker[" + i + "].Price_TOP_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) + "\n";
+            CMM_Dock_UP += "D[" + string(i) + "].Price_TOP_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) + "\n";
+            CMM_Dock_UP += "D[" + string(i) + "].Price_TOP_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) + "\n";
 
-            CMM_Dock_DW += "Docker.Docker[" + i + "].Price_BOT_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) + "\n";
-            CMM_Dock_DW += "Docker.Docker[" + i + "].Price_BOT_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) + "\n";
+            CMM_Dock_DW += "D[" + string(i) + "].Price_BOT_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) + "\n";
+            CMM_Dock_DW += "D[" + string(i) + "].Price_BOT_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) + "\n";
          }
          //---
 
@@ -164,7 +162,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 
    Price_Check =  NormalizeDouble(Price_Check, _Digits);
    if(Price_Check == -1) {
-      Print(__FUNCTION__"#", __LINE__, " Price_Check : ", Price_Check," | Funtion --> return   true;");
+      //Print(__FUNCTION__"#", __LINE__, " Price_Check : ", Price_Check," | Funtion --> return   true;");
       return   true;
    }
 
@@ -267,11 +265,11 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
    request.order = OrderDelete_Ticket;                         // order ticket
 //--- send the request
    if(!OrderSend(request,result)) {
-      PrintFormat(__FUNCTION__ + "#" + __LINE__ + " OrderSend error %d",GetLastError()); // if unable to send the request, output the error code
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());    // if unable to send the request, output the error code
       return false;
    }
 //--- information about the operation
-   PrintFormat(__FUNCTION__ + "#" + __LINE__ + " TRADE_ACTION_REMOVE@ retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+   Print(__FUNCTION__, "#", __LINE__, " TRADE_ACTION_REMOVE@ retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
    return true;
 }
 //+------------------------------------------------------------------+
@@ -291,7 +289,7 @@ bool  OrderDeleteAll()
 
    ulong   ORDER_TICKET_CLOSE[];
    ArrayResize(ORDER_TICKET_CLOSE, __Port_CNT_Pending);
-   ArrayInitialize(ORDER_TICKET_CLOSE, EMPTY_VALUE);
+   ArrayInitialize(ORDER_TICKET_CLOSE, 0);
 
    for(int i = 0; i < __Port_CNT_Pending; i++) {
 
@@ -323,10 +321,10 @@ bool  OrderDeleteAll()
 
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
-         if(_OrderTicket != EMPTY_VALUE) {
+         if(_OrderTicket != 0) {
             if(OrderDelete(_OrderTicket)) {
 
-               ORDER_TICKET_CLOSE[i] = EMPTY_VALUE;
+               ORDER_TICKET_CLOSE[i] = 0;
 
             }
          }
@@ -334,7 +332,7 @@ bool  OrderDeleteAll()
       for(int i = 0; i < __Port_CNT_Pending; i++) {
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
-         if(_OrderTicket == EMPTY_VALUE) {
+         if(_OrderTicket == 0) {
             doIsDeleteAll = true;
          } else {
             doIsDeleteAll = false;
@@ -489,9 +487,9 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 
 //--- send the request
    if(!OrderSend(request,result))
-      PrintFormat(__FUNCTION__ + "#" + __LINE__ + " OrderSend error %d",GetLastError());                 // if unable to send the request, output the error code
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error %d",GetLastError());                 // if unable to send the request, output the error code
 //--- information about the operation
-   PrintFormat(__FUNCTION__ + "#" + __LINE__ + " retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+   Print(__FUNCTION__, "#", __LINE__, " retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
 
 //---
    return   result.order;

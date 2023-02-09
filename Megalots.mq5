@@ -15,7 +15,7 @@ https://www.mql5.com/en/articles/81    MQL4  to MQL5
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-bool  DEV_Clear   =  0;
+bool  DEV_Clear   =  1;
 int OnInit()
 {
 //--- create timer
@@ -23,7 +23,7 @@ int OnInit()
 
    ChartSetInteger(0,CHART_SHOW_GRID,false);
 
-
+   Print(__FUNCTION__"#", __LINE__);
    Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
 
 //Print(__FUNCTION__"#", __LINE__, " test : ", test);
@@ -35,7 +35,49 @@ int OnInit()
    OrderDeleteAll();
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
+   {
+      {
+         ulong  position_ticket = 1592424285;     // ticket of the position
+         string position_symbol = _Symbol;         // symbol
+         ENUM_POSITION_TYPE type = POSITION_TYPE_SELL;
+         //---
 
+         MqlTradeRequest request;
+         MqlTradeResult  result;
+
+         //--- zeroing the request and result values
+         ZeroMemory(request);
+         ZeroMemory(result);
+         //--- setting the operation parameters
+         request.action    = TRADE_ACTION_DEAL;       // type of trade operation
+         request.position  = position_ticket;         // ticket of the position
+         request.symbol    = position_symbol;         // symbol
+         request.volume    = 0.01;                  // volume of the position
+         request.deviation = 5;                      // allowed deviation from the price
+         request.magic     = 0;            // MagicNumber of the position
+
+         //--- set the price and order type depending on the position type
+
+         if(type == POSITION_TYPE_BUY) {
+            request.price = SymbolInfoDouble(position_symbol,SYMBOL_BID);
+            request.type = ORDER_TYPE_SELL;
+         }
+         if(POSITION_TYPE_SELL) {
+            request.price = SymbolInfoDouble(position_symbol,SYMBOL_ASK);
+            request.type = ORDER_TYPE_BUY;
+         }
+
+         //--- output information about the closure
+         PrintFormat("Close #%I64d %s %s",position_ticket,position_symbol,EnumToString(type));
+         //--- send the request
+         if(!OrderSend(request,result))
+            PrintFormat(__LINE__ + "OrderSend error %d",GetLastError()); // if unable to send the request, output the error code
+         //--- information about the operation
+         PrintFormat(__LINE__ + "retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+         //---
+      }
+
+   }
 
    OnTick();
    return(INIT_SUCCEEDED);
@@ -275,6 +317,79 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool  OrderCloseAll()
+{
+   /* Mock Data*/
+   ulong   EXPERT_MAGIC  =  0;
+   /* Mock Data# */
+
+   /* Funtion */
+   int   CountOfBox = 0;
+   /* Funtion# */
+
+   int   __Port_CNT_Avtive  = PositionsTotal();
+
+   ulong   ORDER_TICKET_CLOSE[];
+   ArrayResize(ORDER_TICKET_CLOSE, __Port_CNT_Avtive);
+   ArrayInitialize(ORDER_TICKET_CLOSE, 0);
+
+   for(int i = 0; i < __Port_CNT_Avtive; i++) {
+
+      ulong    _PositionGetTicket = PositionGetTicket(i);
+
+      if(_PositionGetTicket != 0 &&
+         PositionSelectByTicket(_PositionGetTicket)) {
+
+         if(PositionGetSymbol(i) != _Symbol) {
+            continue;
+         }
+
+         //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
+
+         long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
+         if(__POSITION_MAGIC == EXPERT_MAGIC) {
+
+            ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
+            CountOfBox++;
+         }
+
+      }
+   }
+//---
+
+   bool  doIsDeleteAll  =  false;
+   do {
+      for(int i = 0; i < __Port_CNT_Avtive; i++) {
+
+         ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
+
+         if(_OrderTicket != 0) {
+            if(OrderDelete(_OrderTicket)) {
+
+               ORDER_TICKET_CLOSE[i] = 0;
+
+            }
+         }
+      }
+      for(int i = 0; i < __Port_CNT_Avtive; i++) {
+         ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
+
+         if(_OrderTicket == 0) {
+            doIsDeleteAll = true;
+         } else {
+            doIsDeleteAll = false;
+            break;
+         }
+      }
+   } while(doIsDeleteAll);
+
+   Print(__FUNCTION__"#", __LINE__, " doIsDeleteAll : ", doIsDeleteAll, " | CountOfBox : ", CountOfBox);
+//---
+   return   true;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool  OrderDeleteAll()
 {
    /* Mock Data*/
@@ -359,6 +474,7 @@ void OnTimer()
 void OnTrade()
 {
 //---
+   Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+
@@ -369,6 +485,7 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
+   Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+

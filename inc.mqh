@@ -228,11 +228,11 @@ bool  OrderClose(ulong  position_ticket)
       PrintFormat("Close #%I64d %s %s",position_ticket,request.symbol,EnumToString(type));
       //--- send the request
       if(!OrderSend(request,result)) {
-         PrintFormat(__LINE__ + "OrderSend error %d",GetLastError()); // if unable to send the request, output the error code
+         Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());                 // if unable to send the request, output the error code
          return   false;
       }
       //--- information about the operation
-      PrintFormat(__LINE__ + "retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+      Print(__FUNCTION__, "#", __LINE__, " retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
       //---
    }
    return   true;

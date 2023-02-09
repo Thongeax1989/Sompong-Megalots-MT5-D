@@ -12,10 +12,14 @@
 /**
 https://www.mql5.com/en/articles/81    MQL4  to MQL5
 **/
+
+#define     EA_Identity          "MLot"    //OrderName
+#define     EA_Identity_Short    "MLO"
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-bool  DEV_Clear   =  1;
+bool  DEV_Clear   =  0;
 int OnInit()
 {
 //--- create timer
@@ -334,7 +338,7 @@ bool  OrderCloseAll()
             }
          }
       }
-      
+
       for(int i = 0; i < __Port_CNT_Avtive; i++) {
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
@@ -515,31 +519,24 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
    ulong   EXPERT_MAGIC  =  0;
    /* Mock Data*/
 
-//--- declare and initialize the trade request and result of trade request
-   MqlTradeRequest request = {};
-   MqlTradeResult  result = {};
-//--- parameters to place a pending order
-   request.action   = TRADE_ACTION_PENDING;                            // type of trade operation
-
-   request.symbol   = Symbol();                                        // symbol
-//request.volume   = 0.1;                                             // volume of 0.1 lot
-
-   request.deviation = 0;                                              // allowed deviation from the price
-   request.magic    = EXPERT_MAGIC;                                    // MagicNumber of the order
-//int offset = 50;                                                    // offset from the current price to place the order, in points
-
-//double point = SymbolInfoDouble(_Symbol,SYMBOL_POINT);              // value of point
-//int digits = int(SymbolInfoInteger(_Symbol,SYMBOL_DIGITS));              // number of decimal places (precision)
-
+   double  master =  Docker.Global.Price_Master;
+   int zone_n1  =    Docker.Global.Docker_total_1;
+   int zone_n2  =    Docker.Global.Docker_total_2;
 //---
+   int zone_ditance  =  int(Docker.Global.Point_Distance);
+//---
+//--- ZoneStamper
+   /* Name|MasterPrice|ModePlace|N1,N2|Distance */
+   string   OrderTagsCMM   =  EA_Identity + "|" +
+                              DoubleToString(master, _Digits) + "|" +
+                              string(exZone_PPlaceMODE) + "|" +
+                              string(zone_n1) + "," + string(zone_n2) + "|" +
+                              string(zone_ditance);
+//---
+//--- checking the type of operation
    double   lot   =  -1;
    double __BID = SymbolInfoDouble(_Symbol,SYMBOL_BID);
 
-//--- Mock Data
-//price = __BID + (300 * _Point);
-//---
-
-//--- checking the type of operation
    if(OP_DIR == ORDER_TYPE_BUY) {
 
       lot = Docker.Docker[DockRoom].Lot_Buy;
@@ -561,16 +558,26 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
       }
    }
 //---
+   MqlTradeRequest request = {};
+   MqlTradeResult  result = {};
+//---
+   request.magic    = EXPERT_MAGIC;                                    // MagicNumber of the order
 
-   request.type     = OP_DIR;                                        // order type
+   request.action   = TRADE_ACTION_PENDING;                            // type of trade operation
+   request.type     = OP_DIR;                                           // order type
+   request.symbol   = Symbol();                                        // symbol
+
    request.price    = NormalizeDouble(price,_Digits);                 // normalized opening price
    request.volume   = lot;
+   request.deviation = 0;                                              // allowed deviation from the price
+
+   request.comment   =  OrderTagsCMM;
 
 //--- send the request
    if(!OrderSend(request,result))
-      Print(__FUNCTION__, "#", __LINE__, " OrderSend error %d",GetLastError());                 // if unable to send the request, output the error code
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());                 // if unable to send the request, output the error code
 //--- information about the operation
-   Print(__FUNCTION__, "#", __LINE__, " retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+   Print(__FUNCTION__, "#", __LINE__, " retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
 
 //---
    return   result.order;

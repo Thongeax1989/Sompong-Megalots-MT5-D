@@ -27,6 +27,7 @@ int OnInit()
 
    ChartSetInteger(0,CHART_SHOW_GRID,false);
 
+
    Print(__FUNCTION__"#", __LINE__);
    Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
 
@@ -35,7 +36,8 @@ int OnInit()
    Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
 //---
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
-
+   
+   Docker.Main();
    OrderDeleteAll();
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
@@ -196,6 +198,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 
                   if(_PositionGetTicket == Ticket_Check) {
                      IsTicket_Found = true;
+                     return   true;
                   }
                   /***Mian Funtion # End***/
                }

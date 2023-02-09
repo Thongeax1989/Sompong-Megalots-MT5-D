@@ -27,24 +27,201 @@ int OnInit()
 
    ChartSetInteger(0,CHART_SHOW_GRID,false);
 
-   Print(__FUNCTION__"#", __LINE__);
-   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
+   Print(" ----------------------------------------------------------------------------------------- ");
+   Print(" ----------------------------------------------------------------------------------------- ");
 
-//Print(__FUNCTION__"#", __LINE__, " test : ", test);
-
-   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
-//---
-   Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
-
-   OrderDeleteAll();
-
-   Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
    {
+      ChartSetInteger(0,CHART_SHOW_GRID,false);
+      //---
 
-      OrderCloseAll();
+      Program.Running   =  false;
+      Print(__FUNCTION__, "#", __LINE__, " Check Init Start | Program.Running : ", Program.Running);
+      //---
+
+      int   reason   =  UninitializeReason() ;
+      Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", reason);
+
+      {
+         esStopLoss_Distance_Point = NormalizeDouble(exStopLoss_Distance_Point * -1,Digits);
+      }
+
+      Port.Calculator();
+      {
+         ProduckLock.Checker();
+         //Program.ProduckLock =  ProduckLock.EA_Allow;
+      }
+      if(reason == REASON_CHARTCHANGE/*3*/) {
+         //return(INIT_SUCCEEDED);
+
+         Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.Price_Master);
+
+      } else {
+         Program.Running = false;
+
+         if(Port.cnt_All > 0) {
+
+            Global.Price_Master =  Port.Price_Master;
+
+            if(UninitializeReason() == REASON_PARAMETERS) {
+
+               Dev.LINE_Init = __LINE__;
+
+               Global.Zone_PPlaceMODE  =  Port.Zone_PPlaceMODE;
+
+               Global.Docker_total   = Zone_getCNT(exZone_CNT, exZone_CNT_2, Global.Zone_PPlaceMODE);
+
+               Global.Point_Distance = exZone_Distance;
+               Global.Price_Distance = exZone_Distance * Point;
+
+            } else {
+
+               Dev.LINE_Init = __LINE__;
+
+               Global.Zone_PPlaceMODE  =  Port.Zone_PPlaceMODE;
+
+               Global.Docker_total =   Zone_getCNT(Port.Docker_total_1, Port.Docker_total_2, Global.Zone_PPlaceMODE);
+
+               Global.Docker_total_1 = Port.Docker_total_1;
+               Global.Docker_total_2 = Port.Docker_total_2;
+
+               Global.Point_Distance = Port.Point_Distance;
+               Global.Price_Distance = Global.Point_Distance * Point;
+
+            }
+
+            //--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            {
+               Global.Docker_total   =  ArrayResize(Docker, Global.Docker_total);
+               Print(__FUNCTION__, " Docker_total : ", Global.Docker_total);
+               Print(__FUNCTION__, " Docker_total_1 : ", Global.Docker_total_1);
+               Print(__FUNCTION__, " Docker_total_2 : ", Global.Docker_total_2);
+
+               {
+                  ObjectsDeleteAll(0, 0, -1);
+
+                  //---Order_Close
+                  //__Order_Close(-1);
+
+                  //--- OrderDelete
+                  Order_PendingDelete();
+               }
+
+               Docker_Define();
+               Docker_ObjDrawing();
+
+               OrderDocker_Remember();
+            }
+
+         } else { /*--- None Active Case ---*/
+
+            Dev.LINE_Init = __LINE__;
+
+            int   Reason   =  UninitializeReason();
+            Print("Reason : ", Reason);
+
+            if(Reason == REASON_PARAMETERS ||
+               Reason == 0) {
+
+               if(exZone_PriceStart >= 0) {
+
+                  Dev.LINE_Init = __LINE__;
+
+                  double   DEV_Price_Master_Carry = 0 * Point;
+                  Global.Price_Master = (exZone_PriceStart == 0) ?
+                                        Bid - DEV_Price_Master_Carry :
+                                        exZone_PriceStart;
+
+                  Global.Docker_total   = Zone_getCNT(exZone_CNT, exZone_CNT_2, exZone_PPlaceMODE);
+
+                  Global.Point_Distance = exZone_Distance;
+                  Global.Price_Distance = exZone_Distance * Point;
+                  //---
+
+                  Global.Docker_total   =  ArrayResize(Docker, Global.Docker_total);
+                  Print(__FUNCTION__, " Docker_total : ", Global.Docker_total);
+                  Print(__FUNCTION__, " Docker_total_1 : ", Global.Docker_total_1);
+                  Print(__FUNCTION__, " Docker_total_2 : ", Global.Docker_total_2);
+
+                  {
+                     ObjectsDeleteAll(0, 0, -1);
+
+                     //---Order_Close
+                     //__Order_Close(-1);
+
+                     //--- OrderDelete
+                     Order_PendingDelete();
+                  }
+
+                  Docker_Define();
+                  Docker_ObjDrawing();
+
+               } else { /*--- Master Prive are negative ---*/
+
+                  Dev.LINE_Init = __LINE__;
+
+                  //--- Stop
+
+                  {
+                     ObjectsDeleteAll(0, 0, -1);
+
+                     //---Order_Close
+                     //__Order_Close(-1);
+
+                     //--- OrderDelete
+                     Order_PendingDelete();
+                  }
+
+               }
+            }
+
+         }
+         //---
+         {
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_HLINE);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_LABEL);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_EDIT);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_BUTTON);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_RECTANGLE_LABEL);
+
+            Port.Calculator();
+            GUI();
+
+         }
+         {
+            Program.Running = ProduckLock.Passport(false);
+            //Program.Running   = true;
+         }
+      }
+   }
+   {
+      Comments.add("#Version", ea_version);
+
+      Comments.add("Dev.LINE_Init", Dev.LINE_Init, 0);
+      Comments.newline();
+
+      Comments.add("Docker_total", Global.Docker_total, 0);
+      Comments.add("Global.Price_Master", Global.Price_Master, Digits);
+
+      //Comments.add("cnt_All",Port.cnt_All);
+      //Comments.newline();
+
+      //Comments.add("sumHold_Buy",Port.sumHold_Buy,2);
+      //Comments.add("sumHold_Sel",Port.sumHold_Sel,2);
+
+      Comments.add("Port.ActivePlace_TOP", Port.ActivePlace_TOP, Digits);
+      Comments.add("Port.ActivePlace_BOT", Port.ActivePlace_BOT, Digits);
+
+      Comments.Show();
    }
 
+   Print(__FUNCTION__, "#", __LINE__, " Check Init End | Program.Running : ", Program.Running);
+   Print(" ----------------------------------------------------------------------------------------- ");
+   Print(" ----------------------------------------------------------------------------------------- ");
+
+   Print(__FUNCTION__, "#", __LINE__, " OnTick() in init...");
    OnTick();
+   
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -453,8 +630,8 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-//Print(__FUNCTION__"#", __LINE__);
-
+   Print(__FUNCTION__"#", __LINE__);
+   OnTick();
 }
 //+------------------------------------------------------------------+
 //| Tester function                                                  |

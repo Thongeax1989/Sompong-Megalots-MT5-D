@@ -190,6 +190,55 @@ public:
 CPort Port  =  new CPort;
 //+------------------------------------------------------------------+
 #include "inc_Docker.mqh"
+
+
+
+
+
+
+
+struct sProgram {
+   bool              Running;
+   bool              ProduckLock;
+
+   int               State_Ontick;
+
+                     sProgram()
+   {
+      Running        =  false;
+      ProduckLock    =  false;
+
+      State_Ontick   =  false;
+   }
+
+};
+sProgram  Program;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool  OrderClose(ulong  position_ticket)
 {
    {

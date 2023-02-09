@@ -317,8 +317,10 @@ bool  OrderCloseAll()
       }
    }
 //---
-
    bool  doIsDeleteAll  =  false;
+
+   Print(__FUNCTION__"#", __LINE__, " doIsDeleteAll : ", doIsDeleteAll, " | CountOfBox : ", CountOfBox);
+
    do {
       for(int i = 0; i < __Port_CNT_Avtive; i++) {
 
@@ -332,13 +334,14 @@ bool  OrderCloseAll()
             }
          }
       }
+      
       for(int i = 0; i < __Port_CNT_Avtive; i++) {
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
          if(_OrderTicket == 0) {
-            doIsDeleteAll = true;
-         } else {
             doIsDeleteAll = false;
+         } else {
+            doIsDeleteAll = true;
             break;
          }
       }
@@ -409,9 +412,9 @@ bool  OrderDeleteAll()
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
          if(_OrderTicket == 0) {
-            doIsDeleteAll = true;
-         } else {
             doIsDeleteAll = false;
+         } else {
+            doIsDeleteAll = true;
             break;
          }
       }
@@ -435,7 +438,7 @@ void OnTimer()
 void OnTrade()
 {
 //---
-   //Print(__FUNCTION__"#", __LINE__);
+//Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+
@@ -446,7 +449,7 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-   //Print(__FUNCTION__"#", __LINE__);
+//Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+

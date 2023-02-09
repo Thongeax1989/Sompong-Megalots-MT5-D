@@ -3,45 +3,6 @@
 //|                           Copyright 2023 Thongeak - Development. |
 //|                               https://www.facebook.com/lapukdee/ |
 //+------------------------------------------------------------------+
-enum ENUM_ProfitTake {
-   ENUM_ProfitTakeBuySell,    //+ Buy,Sell [Update v1.7]
-   ENUM_ProfitTakeAll,        //+ Original(Holding.Nav)
-   ENUM_ProfitTakeAllInc      //+ Profit + Lot Inc.Lot
-};
-enum ENUM_PlacePending {   //*v1.6+
-   E_PlaceNormal,    //+ Normal
-   E_PlaceHalfFrist  //+ HalfFrist
-};
-enum ENUM_OrderCommentPos {
-   Pos_Name,
-   Pos_MasterPrice,
-   Pos_ModePlace,
-   Pos_N1N2,
-   Pos_Distance
-};
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
-input   int                  exMagicnumber     =  26102022;         //• Magicnumber
-input   string               exOrder_1         =  ""; //-
-input   double               exZone_PriceStart =  0;                //• Price Start (0 = Current of Bid Price)
-input   int                  exZone_Distance   =  50;               //• Distance
-input   ENUM_PlacePending    exZone_PPlaceMODE =  E_PlaceHalfFrist; //• Pending Mode Place
-
-input   string               exOrder1          = " --------------- Order : Group 1 --------------- ";   // --------------------------------------------------
-input   int                  exZone_CNT        =  2;                //• N Order
-input   double               exOrder_Lot_Sel   =  0.02;             //• Lot Sell
-input   double               exOrder_Lot_Buy   =  0.02;             //• Lot Buy
-
-input   string               exOrder2            = " --------------- Order : Group 2 --------------- ";   // --------------------------------------------------
-input   int                  exZone_CNT_2        =  2;              //• N Order : Group 2
-input   double               exOrder_Lot_Sel_2   =  0.01;           //• Lot Sell
-input   double               exOrder_Lot_Buy_2   =  0.01;           //• Lot Buy
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 class CDocker
 {
 public:

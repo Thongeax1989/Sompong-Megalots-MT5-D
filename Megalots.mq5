@@ -36,47 +36,8 @@ int OnInit()
 
    Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
    {
-      {
-         ulong  position_ticket = 1592424285;     // ticket of the position
-         string position_symbol = _Symbol;         // symbol
-         ENUM_POSITION_TYPE type = POSITION_TYPE_SELL;
-         //---
 
-         MqlTradeRequest request;
-         MqlTradeResult  result;
-
-         //--- zeroing the request and result values
-         ZeroMemory(request);
-         ZeroMemory(result);
-         //--- setting the operation parameters
-         request.action    = TRADE_ACTION_DEAL;       // type of trade operation
-         request.position  = position_ticket;         // ticket of the position
-         request.symbol    = position_symbol;         // symbol
-         request.volume    = 0.01;                  // volume of the position
-         request.deviation = 5;                      // allowed deviation from the price
-         request.magic     = 0;            // MagicNumber of the position
-
-         //--- set the price and order type depending on the position type
-
-         if(type == POSITION_TYPE_BUY) {
-            request.price = SymbolInfoDouble(position_symbol,SYMBOL_BID);
-            request.type = ORDER_TYPE_SELL;
-         }
-         if(POSITION_TYPE_SELL) {
-            request.price = SymbolInfoDouble(position_symbol,SYMBOL_ASK);
-            request.type = ORDER_TYPE_BUY;
-         }
-
-         //--- output information about the closure
-         PrintFormat("Close #%I64d %s %s",position_ticket,position_symbol,EnumToString(type));
-         //--- send the request
-         if(!OrderSend(request,result))
-            PrintFormat(__LINE__ + "OrderSend error %d",GetLastError()); // if unable to send the request, output the error code
-         //--- information about the operation
-         PrintFormat(__LINE__ + "retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
-         //---
-      }
-
+      OrderCloseAll();
    }
 
    OnTick();
@@ -364,7 +325,7 @@ bool  OrderCloseAll()
          ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
 
          if(_OrderTicket != 0) {
-            if(OrderDelete(_OrderTicket)) {
+            if(OrderClose(_OrderTicket)) {
 
                ORDER_TICKET_CLOSE[i] = 0;
 
@@ -474,7 +435,7 @@ void OnTimer()
 void OnTrade()
 {
 //---
-   Print(__FUNCTION__"#", __LINE__);
+   //Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+
@@ -485,7 +446,7 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-   Print(__FUNCTION__"#", __LINE__);
+   //Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+
@@ -611,6 +572,4 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 //---
    return   result.order;
 }
-//+------------------------------------------------------------------+
-
 //+------------------------------------------------------------------+

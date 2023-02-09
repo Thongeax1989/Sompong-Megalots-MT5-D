@@ -373,6 +373,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 
                   if(_PositionGetTicket == Ticket_Check) {
                      IsTicket_Found = true;
+                     return   true;
                   }
                   /***Mian Funtion # End***/
                }

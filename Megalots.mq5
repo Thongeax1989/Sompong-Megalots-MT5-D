@@ -12,6 +12,9 @@
 /**
 https://www.mql5.com/en/articles/81    MQL4  to MQL5
 **/
+
+
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -23,21 +26,201 @@ int OnInit()
 
    ChartSetInteger(0,CHART_SHOW_GRID,false);
 
+   Print(" ----------------------------------------------------------------------------------------- ");
+   Print(" ----------------------------------------------------------------------------------------- ");
 
-   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
+   {
+      ChartSetInteger(0,CHART_SHOW_GRID,false);
+      //---
 
-//Print(__FUNCTION__"#", __LINE__, " test : ", test);
+      Program.Running   =  false;
+      Print(__FUNCTION__, "#", __LINE__, " Check Init Start | Program.Running : ", Program.Running);
+      //---
 
-   Print(__FUNCTION__"#", __LINE__, " ------------------------------------------------------------ ");
-//---
-   Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
+      int   reason   =  UninitializeReason() ;
+      Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", reason);
 
-   OrderDeleteAll();
+      {
+         esStopLoss_Distance_Point = NormalizeDouble(exStopLoss_Distance_Point * -1,_Digits);
+      }
 
-   Print(__FUNCTION__"#", __LINE__, " DevDevDevDevDevDevDevDevDevDevDev ");
+      Port.Order_Callculator();
+      {
+         ProduckLock.Checker();
+         //Program.ProduckLock =  ProduckLock.EA_Allow;
+      }
+      if(reason == REASON_CHARTCHANGE/*3*/) {
+         //return(INIT_SUCCEEDED);
 
+         Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.docker.Price_Master);
 
+      } else {
+         Program.Running = false;
+
+         if(Port.All.CNT_Avtive > 0) {
+
+            Docker.Global.Price_Master =  Port.docker.Price_Master;
+
+            if(UninitializeReason() == REASON_PARAMETERS) {
+
+               Dev.LINE_Init = __LINE__;
+
+               Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
+
+               Docker.Global.Docker_total   = Zone_getCNT(exZone_CNT, exZone_CNT_2, Docker.Global.Zone_PPlaceMODE);
+
+               Docker.Global.Point_Distance = exZone_Distance;
+               Docker.Global.Price_Distance = exZone_Distance * _Point;
+
+            } else {
+
+               Dev.LINE_Init = __LINE__;
+
+               Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
+
+               Docker.Global.Docker_total =   Zone_getCNT(Port.docker.Docker_total_1, Port.docker.Docker_total_2, Docker.Global.Zone_PPlaceMODE);
+
+               Docker.Global.Docker_total_1 = Port.docker.Docker_total_1;
+               Docker.Global.Docker_total_2 = Port.docker.Docker_total_2;
+
+               Docker.Global.Point_Distance = Port.docker.Point_Distance;
+               Docker.Global.Price_Distance = Docker.Global.Point_Distance * _Point;
+
+            }
+
+            //--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            {
+               Docker.Global.Docker_total   =  ArrayResize(Docker.Docker, Docker.Global.Docker_total);
+               Print(__FUNCTION__, " Docker_total : ", Docker.Global.Docker_total);
+               Print(__FUNCTION__, " Docker_total_1 : ", Docker.Global.Docker_total_1);
+               Print(__FUNCTION__, " Docker_total_2 : ", Docker.Global.Docker_total_2);
+
+               {
+                  ObjectsDeleteAll(0, 0, -1);
+
+                  //---Order_Close
+                  //__Order_Close(-1);
+
+                  //--- OrderDelete
+                  OrderDeleteAll();
+               }
+
+               Docker.Docker_Define();
+               Docker.Docker_ObjDrawing();
+
+               OrderDocker_Remember();
+            }
+
+         } else { /*--- None Active Case ---*/
+
+            Dev.LINE_Init = __LINE__;
+
+            int   Reason   =  UninitializeReason();
+            Print("Reason : ", Reason);
+
+            if(Reason == REASON_PARAMETERS ||
+               Reason == 0) {
+
+               if(exZone_PriceStart >= 0) {
+
+                  Dev.LINE_Init = __LINE__;
+
+                  double   DEV_Price_Master_Carry = 0 * _Point;
+                  Docker.Global.Price_Master = (exZone_PriceStart == 0) ?
+                                               SymbolInfoDouble(_Symbol,SYMBOL_BID) - DEV_Price_Master_Carry :
+                                               exZone_PriceStart;
+
+                  Docker.Global.Docker_total   = Zone_getCNT(exZone_CNT, exZone_CNT_2, exZone_PPlaceMODE);
+
+                  Docker.Global.Point_Distance = exZone_Distance;
+                  Docker.Global.Price_Distance = exZone_Distance * _Point;
+                  //---
+
+                  Docker.Global.Docker_total   =  ArrayResize(Docker.Docker, Docker.Global.Docker_total);
+                  Print(__FUNCTION__, " Docker_total : ", Docker.Global.Docker_total);
+                  Print(__FUNCTION__, " Docker_total_1 : ", Docker.Global.Docker_total_1);
+                  Print(__FUNCTION__, " Docker_total_2 : ", Docker.Global.Docker_total_2);
+
+                  {
+                     ObjectsDeleteAll(0, 0, -1);
+
+                     //---Order_Close
+                     //__Order_Close(-1);
+
+                     //--- OrderDelete
+                     OrderDeleteAll();
+                  }
+
+                  Docker.Docker_Define();
+                  Docker.Docker_ObjDrawing();
+
+               } else { /*--- Master Prive are negative ---*/
+
+                  Dev.LINE_Init = __LINE__;
+
+                  //--- Stop
+
+                  {
+                     ObjectsDeleteAll(0, 0, -1);
+
+                     //---Order_Close
+                     //__Order_Close(-1);
+
+                     //--- OrderDelete
+                     OrderDeleteAll();
+                  }
+
+               }
+            }
+
+         }
+         //---
+         {
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_HLINE);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_LABEL);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_EDIT);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_BUTTON);
+            ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_RECTANGLE_LABEL);
+
+            Port.Order_Callculator();
+            //GUI();
+
+         }
+         {
+            Program.Running = ProduckLock.Passport(false);
+            //Program.Running   = true;
+         }
+      }
+   }
+   {
+      Comments.add("#Version", EA_Version);
+
+      Comments.add("Dev.LINE_Init", Dev.LINE_Init, 0);
+      Comments.newline();
+
+      Comments.add("Docker_total", Docker.Global.Docker_total, 0);
+      Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
+
+      //Comments.add("cnt_All",Port.cnt_All);
+      //Comments.newline();
+
+      //Comments.add("sumHold_Buy",Port.sumHold_Buy,2);
+      //Comments.add("sumHold_Sel",Port.sumHold_Sel,2);
+
+      Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
+      Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
+
+      Comments.Show();
+   }
+
+   Print(__FUNCTION__, "#", __LINE__, " Check Init End | Program.Running : ", Program.Running);
+   Print(" ----------------------------------------------------------------------------------------- ");
+   Print(" ----------------------------------------------------------------------------------------- ");
+
+   Print(__FUNCTION__, "#", __LINE__, " OnTick() in init...");
    OnTick();
+
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -189,6 +372,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 
                   if(_PositionGetTicket == Ticket_Check) {
                      IsTicket_Found = true;
+                     return   true;
                   }
                   /***Mian Funtion # End***/
                }
@@ -247,104 +431,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool OrderDelete(ulong  OrderDelete_Ticket)
-{
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data*/
 
-//--- declare and initialize the trade request and result of trade request
-   MqlTradeRequest request = {};
-   MqlTradeResult  result = {};
-
-//--- zeroing the request and result values
-   ZeroMemory(request);
-   ZeroMemory(result);
-//--- setting the operation parameters
-   request.action = TRADE_ACTION_REMOVE;                 // type of trade operation
-   request.order = OrderDelete_Ticket;                         // order ticket
-//--- send the request
-   if(!OrderSend(request,result)) {
-      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());    // if unable to send the request, output the error code
-      return false;
-   }
-//--- information about the operation
-   Print(__FUNCTION__, "#", __LINE__, " TRADE_ACTION_REMOVE@ retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
-   return true;
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-bool  OrderDeleteAll()
-{
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data# */
-
-   /* Funtion */
-   int   CountOfBox = 0;
-   /* Funtion# */
-
-   int   __Port_CNT_Pending = OrdersTotal();
-
-   ulong   ORDER_TICKET_CLOSE[];
-   ArrayResize(ORDER_TICKET_CLOSE, __Port_CNT_Pending);
-   ArrayInitialize(ORDER_TICKET_CLOSE, 0);
-
-   for(int i = 0; i < __Port_CNT_Pending; i++) {
-
-      ulong    _OrderGetTicket = OrderGetTicket(i);
-
-      if(_OrderGetTicket != 0 &&
-         OrderSelect(_OrderGetTicket)) {
-
-         if(OrderGetString(ORDER_SYMBOL) != _Symbol) {
-            continue;
-         }
-
-         //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
-
-         long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-         if(__ORDER_MAGIC == EXPERT_MAGIC) {
-
-            ORDER_TICKET_CLOSE[i] = _OrderGetTicket;
-            CountOfBox++;
-         }
-
-      }
-   }
-//---
-
-   bool  doIsDeleteAll  =  false;
-   do {
-      for(int i = 0; i < __Port_CNT_Pending; i++) {
-
-         ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
-
-         if(_OrderTicket != 0) {
-            if(OrderDelete(_OrderTicket)) {
-
-               ORDER_TICKET_CLOSE[i] = 0;
-
-            }
-         }
-      }
-      for(int i = 0; i < __Port_CNT_Pending; i++) {
-         ulong _OrderTicket = ORDER_TICKET_CLOSE[i];
-
-         if(_OrderTicket == 0) {
-            doIsDeleteAll = true;
-         } else {
-            doIsDeleteAll = false;
-            break;
-         }
-      }
-   } while(doIsDeleteAll);
-
-   Print(__FUNCTION__"#", __LINE__, " doIsDeleteAll : ", doIsDeleteAll, " | CountOfBox : ", CountOfBox);
-//---
-   return   true;
-}
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
@@ -359,6 +446,7 @@ void OnTimer()
 void OnTrade()
 {
 //---
+//Print(__FUNCTION__"#", __LINE__);
 
 }
 //+------------------------------------------------------------------+
@@ -369,7 +457,8 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-
+   Print(__FUNCTION__"#", __LINE__);
+   //OnTick();
 }
 //+------------------------------------------------------------------+
 //| Tester function                                                  |
@@ -434,31 +523,24 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
    ulong   EXPERT_MAGIC  =  0;
    /* Mock Data*/
 
-//--- declare and initialize the trade request and result of trade request
-   MqlTradeRequest request = {};
-   MqlTradeResult  result = {};
-//--- parameters to place a pending order
-   request.action   = TRADE_ACTION_PENDING;                            // type of trade operation
-
-   request.symbol   = Symbol();                                        // symbol
-//request.volume   = 0.1;                                             // volume of 0.1 lot
-
-   request.deviation = 0;                                              // allowed deviation from the price
-   request.magic    = EXPERT_MAGIC;                                    // MagicNumber of the order
-//int offset = 50;                                                    // offset from the current price to place the order, in points
-
-//double point = SymbolInfoDouble(_Symbol,SYMBOL_POINT);              // value of point
-//int digits = int(SymbolInfoInteger(_Symbol,SYMBOL_DIGITS));              // number of decimal places (precision)
-
+   double  master =  Docker.Global.Price_Master;
+   int zone_n1  =    Docker.Global.Docker_total_1;
+   int zone_n2  =    Docker.Global.Docker_total_2;
 //---
+   int zone_ditance  =  int(Docker.Global.Point_Distance);
+//---
+//--- ZoneStamper
+   /* Name|MasterPrice|ModePlace|N1,N2|Distance */
+   string   OrderTagsCMM   =  EA_Identity + "|" +
+                              DoubleToString(master, _Digits) + "|" +
+                              string(exZone_PPlaceMODE) + "|" +
+                              string(zone_n1) + "," + string(zone_n2) + "|" +
+                              string(zone_ditance);
+//---
+//--- checking the type of operation
    double   lot   =  -1;
    double __BID = SymbolInfoDouble(_Symbol,SYMBOL_BID);
 
-//--- Mock Data
-//price = __BID + (300 * _Point);
-//---
-
-//--- checking the type of operation
    if(OP_DIR == ORDER_TYPE_BUY) {
 
       lot = Docker.Docker[DockRoom].Lot_Buy;
@@ -480,20 +562,28 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
       }
    }
 //---
+   MqlTradeRequest request = {};
+   MqlTradeResult  result = {};
+//---
+   request.magic    = EXPERT_MAGIC;                                    // MagicNumber of the order
 
-   request.type     = OP_DIR;                                        // order type
+   request.action   = TRADE_ACTION_PENDING;                            // type of trade operation
+   request.type     = OP_DIR;                                           // order type
+   request.symbol   = Symbol();                                        // symbol
+
    request.price    = NormalizeDouble(price,_Digits);                 // normalized opening price
    request.volume   = lot;
+   request.deviation = 0;                                              // allowed deviation from the price
+
+   request.comment   =  OrderTagsCMM;
 
 //--- send the request
    if(!OrderSend(request,result))
-      Print(__FUNCTION__, "#", __LINE__, " OrderSend error %d",GetLastError());                 // if unable to send the request, output the error code
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());                 // if unable to send the request, output the error code
 //--- information about the operation
-   Print(__FUNCTION__, "#", __LINE__, " retcode=%u  deal=%I64u  order=%I64u",result.retcode,result.deal,result.order);
+   Print(__FUNCTION__, "#", __LINE__, " retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
 
 //---
    return   result.order;
 }
-//+------------------------------------------------------------------+
-
 //+------------------------------------------------------------------+

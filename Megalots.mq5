@@ -468,7 +468,8 @@ void OnTick()
       !OnClose &&                                     // Not while CloseAll Process
       Program.State_Ontick   == eStateTick_Normal) {   // Checkup CloseAll Process is done
       //Print(__FUNCTION__, "#", __LINE__);
-
+      
+      Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
       if(Program.Running) {
          Print(__FUNCTION__, "#", __LINE__);
 

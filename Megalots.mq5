@@ -212,7 +212,7 @@ int OnInit()
             ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_RECTANGLE_LABEL);
 
             Port.Order_Callculator();
-            //GUI();
+            GUI();
 
          }
          {
@@ -281,22 +281,187 @@ string   CMM_Dock_DW = "\n";
 //+------------------------------------------------------------------+
 void OnTick()
 {
+
+   if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
+      Program.Running   =  false;
+   } else {
+      //Print(__FUNCSIG__,"#",__LINE__,"__Module Frisrt * Else | !IsExpertEnabled() = ",!IsExpertEnabled()," | Program.Running = ",Program.Running);
+   }
+   {
+      Port.Order_Callculator();
+
+      if(Port.All.CNT_Avtive == 0 &&
+         Program.State_Ontick == eStateTick_CloseAll) {
+
+         Program.State_Ontick   = eStateTick_Normal;
+      }
+
+      if(Program.Running && ProduckLock.PassportIsTemp() &&
+         (Port.All.CNT_Avtive == 0 || Port.All.CNT_Pending == 0)) {
+
+         ProduckLock.Checker();
+
+         Program.Running   =  ProduckLock.Passport(false);
+
+         if(ProduckLock.EA_Allow == false) {
+            OrderDeleteAll();
+         }
+      }
+
+      //GUI();
+
+   }
+//---
+   bool  OnClose  = false;
+   if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && Program.Running &&
+      Port.All.CNT_Avtive > 0) {
+      bool  IsCloseAll  =  false;
+
+      if(exProfit_MODE == ENUM_ProfitTakeAll) {
+         if(Port.All.Sum_ActiveHold >= exProfit_TakeTraget) {
+            Print("");
+            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
+            Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Sum_ActiveHold,">=",exProfit_TakeTraget);
+
+            OrderCloseAll(-1);
+            OnClose     = true;
+
+            IsCloseAll  = true;
+         }
+      }
+      if(exProfit_MODE == ENUM_ProfitTakeAllInc) {
+         if(Port.All.Profit_Inc >= exProfit_TakeTraget) {
+            Print("");
+            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
+            Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Profit_Inc,">=",exProfit_TakeTraget);
+
+            OrderCloseAll(-1);
+            OnClose     = true;
+
+            IsCloseAll  = true;
+         }
+      }
+
+      if(exProfit_MODE == ENUM_ProfitTakeBuySell) {      /*** v1.70+ ***/
+
+         if(Port.Buy.Sum_ActiveHold >= exProfit_TakeTraget_BUY_) {
+            Print("");
+            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeBuySell);
+            Print(__FUNCTION__,__LINE__," Order_Close(POSITION_TYPE_BUY) | ",Port.Buy.Sum_ActiveHold,">=",exProfit_TakeTraget_BUY_);
+            OrderCloseAll(POSITION_TYPE_BUY);
+            OnClose  = true;
+         }
+         if(Port.Sell.Sum_ActiveHold >= exProfit_TakeTraget_SELL) {
+            Print("");
+            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeBuySell);
+            Print(__FUNCTION__,__LINE__," Order_Close(POSITION_TYPE_SELL) | ",Port.Sell.Sum_ActiveHold,">=",exProfit_TakeTraget_SELL);
+            OrderCloseAll(POSITION_TYPE_SELL);
+            OnClose  = true;
+         }
+
+      }
+
+      {/*** v1.64+ ***/
+         if(Port.All.Sum_ActiveHold < 0) {
+            //---
+            if(exStopLoss_EQ_IO) {
+               double   Act_EQ = AccountInfoDouble(ACCOUNT_EQUITY);
+
+               if(Act_EQ <= exStopLoss_EQ_CutValue) {
+
+                  //PlaySound("alert");
+                  Print(__LINE__,"#",__FUNCTION__," Stoploss-Equity | ",Act_EQ," : ",exStopLoss_EQ_CutValue);
+                  OrderCloseAll(-1);
+                  OrderDeleteAll();     //My Order
+
+                  Program.Running   =  false;
+
+                  OnClose           = true;
+
+               }
+
+            }
+            //---
+            if(exStopLoss_Distance_IO) {
+
+               if(exStopLoss_Distance_Point > 0) {
+
+                  if(Port.docker.ActivePoint_TOP <= esStopLoss_Distance_Point ||
+                     Port.docker.ActivePoint_BOT <= esStopLoss_Distance_Point) {
+
+                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",Port.docker.ActivePoint_TOP,",",Port.docker.ActivePoint_BOT,"]");
+                     OrderCloseAll(-1);
+                     OrderDeleteAll();     //My Order
+
+                     Program.Running   =  false;
+
+                     OnClose           = true;
+
+                  }
+               }
+
+            }
+            //---
+         }
+      }
+
+      if(OnClose) {
+         Port.Order_Callculator();
+         ProduckLock.Checker();
+         GUI();
+
+         if(IsCloseAll) {
+            if(Port.All.CNT_Avtive > 0) {
+               Program.State_Ontick   = eStateTick_CloseAll;   //Hold Close all
+            }
+         }
+
+      }
+   }
+//---
+
+
+//+------------------------------------------------------------------+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+//+------------------------------------------------------------------+
+
+
 //---
    Port.Order_Callculator();
 
-//Print(__FUNCTION__"#", __LINE__, " All.Sum_ActiveHold : ", Port.All.Sum_ActiveHold);
+   {
+      Comments.add("#Version", EA_Version);
+      Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
 
-   string   CMM = "";
-   CMM += "AccountInfoInteger(ACCOUNT_TRADE_EXPERT)" + " : " + string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))) + "\n";
+      Comments.add("Dev.LINE_Init", Dev.LINE_Init, 0);
+      Comments.newline();
 
-   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.All.Sum_ActiveHold,2) + "\n";
-   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.Buy.Sum_ActiveHold,2) + "\n";
-   CMM += "Port.All.Sum_ActiveHold" + " : " + DoubleToString(Port.Sell.Sum_ActiveHold,2) + "\n";
-   CMM += "\n";
+      Comments.add("Docker_total", Docker.Global.Docker_total, 0);
+      Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
 
-   CMM += "Port.Buy.CNT_Pending" + " : " + IntegerToString(Port.Buy.CNT_Pending) + "\n";
-   CMM += "Port.Sell.CNT_Pending" + " : " +  IntegerToString(Port.Sell.CNT_Pending) + "\n";
-   CMM += "Port.All.CNT_Pending" + " : " +  IntegerToString(Port.All.CNT_Pending) + "\n";
+      Comments.add("cnt_All",Port.All.CNT_Avtive);
+      Comments.newline();
+
+      Comments.add("Buy.CNT_Pending", Port.Buy.CNT_Pending);
+      Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Pending);
+      Comments.add("All.CNT_Pending", Port.All.CNT_Pending);
+      Comments.newline();
+
+      Comments.add("Buy.CNT_Avtive", Port.Buy.CNT_Avtive);
+      Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Avtive);
+      Comments.add("All.CNT_Avtive", Port.All.CNT_Avtive);
+      Comments.newline();
+
+      Comments.add("Buy.Sum_ActiveHold", Port.Buy.Sum_ActiveHold, 4);
+      Comments.add("Sell.Sum_ActiveHold",  Port.Sell.Sum_ActiveHold, 4);
+      Comments.add("All.Sum_ActiveHold",  Port.All.Sum_ActiveHold, 4);
+      Comments.newline();
+
+      Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
+      Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
+
+      Comments.Show();
+   }
+
 
 //---
    if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
@@ -360,9 +525,9 @@ void OnTick()
       //DEV_OneTick  = false;
    }
 
-   CMM += CMM_Dock_UP;
-   CMM += "Mid \n";
-   CMM += CMM_Dock_DW;
+//CMM += CMM_Dock_UP;
+//CMM += "Mid \n";
+//CMM += CMM_Dock_DW;
 
 //---
 //Comment(CMM);
@@ -642,4 +807,11 @@ string   UninitializeReason(int  reason)
    }
    return   "-";
 }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void  GUI()
+{
+}
+
 //+------------------------------------------------------------------+

@@ -72,6 +72,10 @@ struct sDev {
    int               LINE_Init;
 };
 sDev  Dev = {-1};
+enum eState_Ontick {
+   eStateTick_Normal,
+   eStateTick_CloseAll
+};
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -131,7 +135,7 @@ public:
       {
          Clear();
       }
-      void  Clear()
+      void           Clear()
       {
          Point_Distance    = -1;
          Price_Master      = -1;
@@ -206,11 +210,22 @@ public:
                      Sell.CNT_Avtive++;
                      Sell.Sum_ActiveHold += __POSITION_PROFIT;
                   }
+                  All.CNT_Avtive    =  Buy.CNT_Avtive + Sell.CNT_Avtive;
+                  All.Sum_Lot       += __POSITION_VOLUME;
+                  All.Sum_ActiveHold =  Buy.Sum_ActiveHold + Sell.Sum_ActiveHold;
+                  //---
 
-                  //
-                  All.Sum_ActiveHold = __POSITION_PROFIT;
-                  All.CNT_Avtive =  Buy.CNT_Avtive + Sell.CNT_Avtive;
-//---
+                  double   SIZE  =  SymbolInfoDouble(NULL, SYMBOL_TRADE_CONTRACT_SIZE) / 100000;
+
+                  All.CommHarvest =  exComm_Lot * All.Sum_Lot * SIZE;
+                  All.Profit_Inc  =  All.Sum_ActiveHold + All.CommHarvest;
+                  //---
+                  {
+                     docker.ActivePlace_TOP   =  MathMax(docker.ActivePlace_TOP,__POSITION_PRICE_OPEN);
+                     docker.ActivePlace_BOT   =  MathMin(docker.ActivePlace_BOT,__POSITION_PRICE_OPEN);
+                  }
+                  //---
+
                   //Print(__FUNCTION__, "#", __LINE__, " docker.Price_Master: ", docker.Price_Master);
                   if(docker.Price_Master   ==  -1) {
                      Print(__FUNCTION__, "#", __LINE__);
@@ -224,7 +239,26 @@ public:
          }
       } /*End : For Active loop + Module*/
 
+      {/* v1.64 */
+         //Global.Price_Master
+         if(All.CNT_Avtive > 0) {
 
+            double   Bid  =  SymbolInfoDouble(NULL,SYMBOL_BID);
+            double   Ask  =  SymbolInfoDouble(NULL,SYMBOL_ASK);
+
+            docker.ActivePoint_TOP = ( docker.ActivePlace_TOP - Ask) / _Point;
+            docker.ActivePoint_BOT = (Bid -  docker.ActivePlace_BOT) / _Point;
+
+            Draw_SumProduct(5,  docker.ActivePlace_TOP, clrYellow,"_ActivePlace_TOP");
+            Draw_SumProduct(5,  docker.ActivePlace_BOT, clrYellow,"_ActivePlace_BOT");
+
+         } else {
+            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_TOP");
+            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_BOT");
+         }
+      }
+
+      //+------------------------------------------------------------------+
 
       int   __Port_CNT_Pending = OrdersTotal();
       if(true) { /* For Pending loop*/
@@ -293,6 +327,7 @@ public:
       return            true;
    }
 
+private:
    bool              getZoneStamp(string  OrderComment__)
    {
       Print(__FUNCTION__"#", __LINE__);
@@ -331,6 +366,23 @@ public:
       }
       Print(__FUNCTION__"#", __LINE__);
       return   false;
+   }
+
+   void              Draw_SumProduct(int OP, double Price, color Clr,string   name = "_SumProduct",bool  IsAdd_IdName = true)
+   {
+      string ObjTag = (IsAdd_IdName) ?
+                      EA_Identity_Short + name + string(OP) :
+                      name + string(OP);
+      //if(!ObjectCreate(chart_ID, name, OBJ_HLINE, sub_window, 0, price)) {
+
+      if(!ObjectCreate(0,ObjTag, OBJ_HLINE, 0, 0, Price)) {
+
+      }
+      if(ObjectMove(0, ObjTag, 0, 0, Price)) {
+      }
+      ObjectSetInteger(0, ObjTag, OBJPROP_BACK, false);
+      ObjectSetInteger(0, ObjTag, OBJPROP_COLOR, Clr);
+
    }
 
 };
@@ -380,6 +432,16 @@ public:
                OrderDeleteAll();
             }
          }
+      }
+      return   false;
+   }
+   bool              PassportIsTemp()
+   {
+      return   true;
+      //---
+
+      if(EA_Point == EA_AllowPoint) {
+         return   true;
       }
       return   false;
    }
@@ -709,7 +771,7 @@ bool  OrderDeleteAll()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  OrderCloseAll()
+bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 {
    /* Funtion */
    int   CountOfBox = 0;
@@ -737,8 +799,14 @@ bool  OrderCloseAll()
          long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
          if(__POSITION_MAGIC == exMagicnumber) {
 
-            ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
-            CountOfBox++;
+            long   __POSITION_TYPE  =  PositionGetInteger(POSITION_TYPE);
+
+            if((OP_DIR == -1) || (OP_DIR != -1 &&  __POSITION_TYPE == OP_DIR)) {
+
+               ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
+               CountOfBox++;
+
+            }
          }
 
       }
@@ -841,4 +909,6 @@ private:
    }
 };
 CComment Comments = new CComment;
+//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+

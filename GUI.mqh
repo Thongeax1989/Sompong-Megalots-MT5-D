@@ -183,8 +183,9 @@ void  GUI_DrawPair(string  name, string text_header,
    if(text_tooltip == "") {
       text_tooltip = text_header;
    }
-
-   Create_Label(EA_Identity_ShortGUI + "|Head|" + name, text_header, clrWhite, GUI.column_1, GUI.Row_Save, text_tooltip);
+   if(text_header != "") {
+      Create_Label(EA_Identity_ShortGUI + "|Head|" + name, text_header, clrWhite, GUI.column_1, GUI.Row_Save, text_tooltip);
+   }
    if(text_header != "") {
       //text_vale_symbol = (text_vale_symbol == "") ? "" : text_vale_symbol;
       if(text_value_1 == "") {
@@ -217,8 +218,10 @@ void  GUI_DrawPair(string  name, string text_header,
 
 //Create_Edit(EA_Identity_ShortGUI + "|N|" + name,text_vale_symbol,GUI.column_3,GUI.Row_Save,GUI.column_3 - (GUI.Panel_Magin) - 2,16,
 //            clrWhite,clrBlack,clrBlack);
-   Create_Label(EA_Identity_ShortGUI + "|N|" + name, text_vale_symbol,       clrText, GUI.column_3, GUI.Row_Save,
-                text_tooltip);
+   if(text_vale_symbol != "") {
+      Create_Label(EA_Identity_ShortGUI + "|N|" + name, text_vale_symbol,       clrText, GUI.column_3, GUI.Row_Save,
+                   text_tooltip);
+   }
 
 //---
    GUI.Row_Save += GUI.Row_Step;
@@ -238,7 +241,7 @@ void  GUI_DrawStepGroup(int  step = 0)
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool Create_Label(const string            name = "Label",           // label name
-                  const string            text = "Label",           // text
+                  const string            text = "",           // text
 
                   const color             clr = clrRed,             // color
 

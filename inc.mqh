@@ -439,11 +439,11 @@ public:
 
          {/* hotfix/CutloseByEQ [v1.644] */
 
-//            if(IsOptimization() || IsTesting())
-//               return   true;
-//
-//            if(action)
-//               return   true;
+            if(MQLInfoInteger(MQL_OPTIMIZATION) ||  MQLInfoInteger(MQL_TESTER))
+               return   true;
+
+            if(action)
+               return   true;
 
          }
 

@@ -65,6 +65,10 @@ double                        esStopLoss_Distance_Point  =  -1;
 
 input   string               exComm           = " --------------- Commission  --------------- ";   // --------------------------------------------------
 input   double               exComm_Lot       = 9;   //• Commission/Lot [ Standard ]
+
+input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
+input   bool                 exPlaysound_OnClose  = true;   //• OnClose
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -143,17 +147,15 @@ public:
       void           ClearStatic()
       {
          Price_Master      = -1;
-         
+
          Zone_PPlaceMODE   = -1;
-         
+
          Docker_DistancePoint    = -1;
          Docker_total_1          = -1;
          Docker_total_2          = -1;
       }
       void           ClearDynamic()
       {
-
-
 
          ActivePlace_TOP = -1;
          ActivePlace_BOT = 9999999999;
@@ -420,6 +422,10 @@ public:
 
    bool              Checker()
    {
+      /* Bypass */
+      double   Bypass   =  "Bypass";
+      ProduckLock.EA_Allow = true;
+      /* Bypass */
 
       return   true;
    }
@@ -441,7 +447,7 @@ public:
       } else {
          if(action) {
             if(Port.All.CNT_Pending > 0) {
-               OrderDeleteAll();
+               OrderDeleteAll(__LINE__);
             }
          }
       }
@@ -692,6 +698,10 @@ bool  OrderDocker_RememberFindDock(ulong OrderTicket_, double  OrderOpenPrice_, 
 //+------------------------------------------------------------------+
 bool OrderDelete(ulong  OrderDelete_Ticket)
 {
+   if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
+      return   false;
+   }
+
 //--- declare and initialize the trade request and result of trade request
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
@@ -714,8 +724,11 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  OrderDeleteAll()
+bool  OrderDeleteAll(int  CommandByLine)
 {
+   if(CommandByLine != -1) {
+      Print(__FUNCTION__, "#", __LINE__, " CommandByLine ",CommandByLine);
+   }
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */

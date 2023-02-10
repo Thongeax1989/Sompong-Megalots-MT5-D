@@ -122,7 +122,7 @@ int OnInit()
                   //__Order_Close(-1);
 
                   //--- OrderDelete
-                  OrderDeleteAll();
+                  OrderDeleteAll(__LINE__);
                }
 
                Docker.Docker_Define();
@@ -174,7 +174,7 @@ int OnInit()
                      //__Order_Close(-1);
 
                      //--- OrderDelete
-                     OrderDeleteAll();
+                     OrderDeleteAll(__LINE__);
                   }
 
                   Docker.Docker_Define();
@@ -194,7 +194,7 @@ int OnInit()
                      //__Order_Close(-1);
 
                      //--- OrderDelete
-                     OrderDeleteAll();
+                     OrderDeleteAll(__LINE__);
                   }
 
                }
@@ -270,9 +270,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-int   retCode = -1;
 
-bool  DEV_OneTick =   true;
 string   CMM_Dock_UP = "\n";
 string   CMM_Dock_DW = "\n";
 
@@ -304,12 +302,17 @@ void OnTick()
          Program.Running   =  ProduckLock.Passport(false);
 
          if(ProduckLock.EA_Allow == false) {
-            OrderDeleteAll();
+            OrderDeleteAll(__LINE__);
          }
       }
 
       //GUI();
 
+   }
+//---
+   {
+      double   Temp = "Temp";
+      Program.Running = true;
    }
 //---
    bool  OnClose  = false;
@@ -319,6 +322,7 @@ void OnTick()
 
       if(exProfit_MODE == ENUM_ProfitTakeAll) {
          if(Port.All.Sum_ActiveHold >= exProfit_TakeTraget) {
+
             Print("");
             Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
             Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Sum_ActiveHold,">=",exProfit_TakeTraget);
@@ -372,7 +376,7 @@ void OnTick()
                   //PlaySound("alert");
                   Print(__LINE__,"#",__FUNCTION__," Stoploss-Equity | ",Act_EQ," : ",exStopLoss_EQ_CutValue);
                   OrderCloseAll(-1);
-                  OrderDeleteAll();     //My Order
+                  OrderDeleteAll(__LINE__);     //My Order
 
                   Program.Running   =  false;
 
@@ -391,7 +395,7 @@ void OnTick()
 
                      Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",Port.docker.ActivePoint_TOP,",",Port.docker.ActivePoint_BOT,"]");
                      OrderCloseAll(-1);
-                     OrderDeleteAll();     //My Order
+                     OrderDeleteAll(__LINE__);     //My Order
 
                      Program.Running   =  false;
 
@@ -406,6 +410,11 @@ void OnTick()
       }
 
       if(OnClose) {
+
+         if(exPlaysound_OnClose) {
+            PlaySound("alert");
+         }
+
          Port.Order_Callculator();
          ProduckLock.Checker();
          GUI();
@@ -431,27 +440,21 @@ void OnTick()
    {
       Comments.add("#Version", EA_Version);
       Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
-      
-      Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
-      Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
+
+      Comments.add("Program.Running ", Program.Running );
+      Comments.newline();
+
+      Comments.add("Port.ActivePlace_TOP", DoubleToString(Port.docker.ActivePlace_TOP, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_TOP,0));
+      Comments.add("Port.ActivePlace_BOT", DoubleToString(Port.docker.ActivePlace_BOT, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_BOT,0));
+      Comments.newline();
 
       Comments.add("Docker_total", Docker.Global.Docker_total, 0);
       Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
       Comments.newline();
 
-      Comments.add("Buy.Sum_ActiveHold", Port.Buy.Sum_ActiveHold, 4);
-      Comments.add("Sell.Sum_ActiveHold",  Port.Sell.Sum_ActiveHold, 4);
-      Comments.add("All.Sum_ActiveHold",  Port.All.Sum_ActiveHold, 4);
-      Comments.newline();
-      
-      Comments.add("Buy.CNT_Pending", Port.Buy.CNT_Pending);
-      Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Pending);
-      Comments.add("All.CNT_Pending", Port.All.CNT_Pending);
-      Comments.newline();
-
-      Comments.add("Buy.CNT_Avtive", Port.Buy.CNT_Avtive);
-      Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Avtive);
-      Comments.add("All.CNT_Avtive", Port.All.CNT_Avtive);
+      Comments.add("Buy",string(Port.Buy.CNT_Avtive) + " / " + string(Port.Buy.CNT_Pending) + " = " + DoubleToString(Port.Buy.Sum_ActiveHold,4));
+      Comments.add("Sell",string(Port.Sell.CNT_Avtive) + " / " + string(Port.Sell.CNT_Pending) + " = " + DoubleToString(Port.Sell.Sum_ActiveHold,4));
+      Comments.add("All",string(Port.All.CNT_Avtive) + " / " + string(Port.All.CNT_Pending) + " = " + DoubleToString(Port.All.Sum_ActiveHold,4));
       Comments.newline();
 
       Comments.Show();
@@ -470,22 +473,16 @@ void OnTick()
       //   Program.Running   =  false;
       //}
 
-      retCode = -1;
+      int retCode = -1;
       for(int i = 0; i < Docker.Global.Docker_total; i++) {
          //---
-         if(true) {
+         if(false) {
             CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) +  "\n";
             CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) +  "\n";
 
             CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) +  "\n";
             CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) +  "\n";
 
-         } else {
-            CMM_Dock_UP += "D[" + string(i) + "].Price_TOP_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) + "\n";
-            CMM_Dock_UP += "D[" + string(i) + "].Price_TOP_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) + "\n";
-
-            CMM_Dock_DW += "D[" + string(i) + "].Price_BOT_UP" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) + "\n";
-            CMM_Dock_DW += "D[" + string(i) + "].Price_BOT_DW" + " : " +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) + "\n";
          }
          //---
 
@@ -808,5 +805,7 @@ string   UninitializeReason(int  reason)
 void  GUI()
 {
 }
+
+//+------------------------------------------------------------------+
 
 //+------------------------------------------------------------------+

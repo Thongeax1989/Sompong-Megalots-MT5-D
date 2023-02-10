@@ -329,6 +329,7 @@ void OnTick()
          ProduckLock.Checker();
 
          Program.Running   =  ProduckLock.Passport(false);
+         Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
 
          if(ProduckLock.EA_Allow == false) {
             OrderDeleteAll(__LINE__);
@@ -395,7 +396,7 @@ void OnTick()
       }
 
       {/*** v1.64+ ***/
-         if(Port.All.Sum_ActiveHold < 0) {
+         if(Port.All.CNT_Avtive > 0 && Port.All.Sum_ActiveHold < 0) {
             //---
             if(exStopLoss_EQ_IO) {
                double   Act_EQ = AccountInfoDouble(ACCOUNT_EQUITY);
@@ -468,10 +469,9 @@ void OnTick()
       !OnClose &&                                     // Not while CloseAll Process
       Program.State_Ontick   == eStateTick_Normal) {   // Checkup CloseAll Process is done
       //Print(__FUNCTION__, "#", __LINE__);
-      
-      Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+
+      //Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
       if(Program.Running) {
-         Print(__FUNCTION__, "#", __LINE__);
 
          CMM_Dock_UP = "\n";
          CMM_Dock_DW = "\n";
@@ -718,14 +718,14 @@ void OnChartEvent(const int id,
                         str = "Do you want to [[ PAUSE ]] the program (stop Place Pending)";
 
                      int  MessageBox_ = MessageBox(str, EA_Identity + " :: Program Status", MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2);
-                     Print(__FUNCTION__, " MessageBox_* : ", MessageBox_);
+                     Print(__FUNCTION__, " MessageBox_* (IDYES=6): ", MessageBox_);
 
                      if(MessageBox_ == IDYES) {
                         Program.Running =  !Program.Running;
                      }
+                     Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
 
                   }
-                  Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
                }
 
                if(result[1] == "Close") {
@@ -742,6 +742,8 @@ void OnChartEvent(const int id,
 
                      if(MessageBox_ == IDYES) {
                         Program.Running = false;
+                        Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
+
                         OrderCloseAll(Type);
                      }
                   } else {
@@ -762,6 +764,7 @@ void OnChartEvent(const int id,
                   if(MessageBox_ == IDYES) {
 
                      Program.Running = false;
+                     Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
 
                      if(Type == 1) {
                         Print(__LINE__);

@@ -413,8 +413,10 @@ void OnTick()
 
       if(OnClose) {
 
-         PlaySound("alert");
-
+         if(exPlaysound_OnClose) {
+            PlaySound("alert");
+         }
+         
          Port.Order_Callculator();
          ProduckLock.Checker();
          GUI();

@@ -65,6 +65,10 @@ double                        esStopLoss_Distance_Point  =  -1;
 
 input   string               exComm           = " --------------- Commission  --------------- ";   // --------------------------------------------------
 input   double               exComm_Lot       = 9;   //• Commission/Lot [ Standard ]
+
+input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
+input   bool                 exPlaysound_OnClose  = true;   //• OnClose
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -92,12 +96,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-                     SOrder()
+      SOrder()
       {
          Clear();
       }
       //--- Destructor
-                    ~SOrder()
+      ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -131,7 +135,7 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-                     SDocker()
+      SDocker()
       {
          Clear();
       }
@@ -165,13 +169,13 @@ public:
    };
    SDocker           docker;
 
-                     CPort()
+   CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-                    ~CPort()
+   ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -415,8 +419,8 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-                     CProductLock(void) {};
-                    ~CProductLock(void) {};
+   CProductLock(void) {};
+   ~CProductLock(void) {};
 
    bool              Checker()
    {
@@ -475,7 +479,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-                     sProgram()
+   sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -885,12 +889,12 @@ bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 class CComment
 {
 public:
-                     CComment(void)
+   CComment(void)
    {
       text_clear();
       Comment("");
    };
-                    ~CComment(void) {};
+   ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

@@ -29,7 +29,7 @@ enum ENUM_OrderCommentPos {
 //+------------------------------------------------------------------+
 input   string               exEAname          = "v" + string(EA_Version);          //# Megalots
 input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
-input   int                  exMagicnumber     =  26102022;         //• Magicnumber
+input   int                  exMagicnumber     =  10022023;         //• Magicnumber
 input   string               exOrder_1         =  ""; //-
 input   double               exZone_PriceStart =  0;                //• Price Start (0 = Current of Bid Price)
 input   int                  exZone_Distance   =  50;               //• Distance
@@ -593,10 +593,6 @@ bool  OrderDocker_RememberFindDock(ulong OrderTicket_, double  OrderOpenPrice_, 
 //+------------------------------------------------------------------+
 bool OrderDelete(ulong  OrderDelete_Ticket)
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data*/
-
 //--- declare and initialize the trade request and result of trade request
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
@@ -621,10 +617,6 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 bool  OrderDeleteAll()
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data# */
-
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -649,7 +641,7 @@ bool  OrderDeleteAll()
          //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
          long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-         if(__ORDER_MAGIC == EXPERT_MAGIC) {
+         if(__ORDER_MAGIC == exMagicnumber) {
 
             ORDER_TICKET_CLOSE[i] = _OrderGetTicket;
             CountOfBox++;
@@ -694,10 +686,6 @@ bool  OrderDeleteAll()
 //+------------------------------------------------------------------+
 bool  OrderCloseAll()
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data# */
-
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -722,7 +710,7 @@ bool  OrderCloseAll()
          //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
          long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-         if(__POSITION_MAGIC == EXPERT_MAGIC) {
+         if(__POSITION_MAGIC == exMagicnumber) {
 
             ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
             CountOfBox++;

@@ -13,8 +13,6 @@
 https://www.mql5.com/en/articles/81    MQL4  to MQL5
 **/
 
-
-
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -337,12 +335,6 @@ void OnTick()
 //+------------------------------------------------------------------+
 bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, int   DevLine)
 {
-   /* Mock Data*/
-   int   __EA_Magic  =  0;
-//Price_Check = SymbolInfoDouble(NULL,SYMBOL_BID);
-   /* Mock Data*/
-//---
-
    Price_Check =  NormalizeDouble(Price_Check, _Digits);
    if(Price_Check == -1) {
       //Print(__FUNCTION__"#", __LINE__, " Price_Check : ", Price_Check," | Funtion --> return   true;");
@@ -366,7 +358,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
             //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket, " | PositionGetSymbol(i) : ", PositionGetSymbol(i));
 
             long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-            if(__POSITION_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+            if(__POSITION_MAGIC == exMagicnumber) {                  //*__EA_Magic fillter
                {
                   /*** Mian Funtion ***/
 
@@ -399,7 +391,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
                //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
                long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-               if(__ORDER_MAGIC == __EA_Magic
+               if(__ORDER_MAGIC == exMagicnumber
                  ) {                        //*__EA_Magic fillter
 
                   //long     __ORDER_TYPE      = OrderGetInteger(ORDER_TYPE);
@@ -519,9 +511,7 @@ void OnBookEvent(const string & symbol)
 //+------------------------------------------------------------------+//+------------------------------------------------------------------+
 ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data*/
+
 
    double  master =  Docker.Global.Price_Master;
    int zone_n1  =    Docker.Global.Docker_total_1;
@@ -565,7 +555,7 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
 //---
-   request.magic    = EXPERT_MAGIC;                                    // MagicNumber of the order
+   request.magic    = exMagicnumber;                                    // MagicNumber of the order
 
    request.action   = TRADE_ACTION_PENDING;                            // type of trade operation
    request.type     = OP_DIR;                                           // order type

@@ -312,6 +312,11 @@ void OnTick()
 
    }
 //---
+   {
+      double   Mark = "1";
+      Program.Running = true;
+   }
+//---
    bool  OnClose  = false;
    if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && Program.Running &&
       Port.All.CNT_Avtive > 0) {
@@ -319,6 +324,7 @@ void OnTick()
 
       if(exProfit_MODE == ENUM_ProfitTakeAll) {
          if(Port.All.Sum_ActiveHold >= exProfit_TakeTraget) {
+
             Print("");
             Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
             Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Sum_ActiveHold,">=",exProfit_TakeTraget);
@@ -406,6 +412,9 @@ void OnTick()
       }
 
       if(OnClose) {
+
+         PlaySound("alert");
+
          Port.Order_Callculator();
          ProduckLock.Checker();
          GUI();
@@ -431,7 +440,10 @@ void OnTick()
    {
       Comments.add("#Version", EA_Version);
       Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
-      
+
+      Comments.add("Program.Running ", Program.Running );
+      Comments.newline();
+
       Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
       Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
 
@@ -443,7 +455,7 @@ void OnTick()
       Comments.add("Sell.Sum_ActiveHold",  Port.Sell.Sum_ActiveHold, 4);
       Comments.add("All.Sum_ActiveHold",  Port.All.Sum_ActiveHold, 4);
       Comments.newline();
-      
+
       Comments.add("Buy.CNT_Pending", Port.Buy.CNT_Pending);
       Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Pending);
       Comments.add("All.CNT_Pending", Port.All.CNT_Pending);

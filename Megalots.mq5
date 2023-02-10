@@ -9,7 +9,7 @@
    #Example.
    "45843128,80000007"     => allow 2 acc.
    ""                      => Account not locked
-
+   
 */
 #define     eaLOCK_Date    ""
 /*
@@ -23,11 +23,11 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-#define EA_Version   "1.00"
+#define EA_Version   "1.71"   //Megalots
 //---
 #property copyright "Copyright 2023 Thongeak - Development."
 #property link      "https://www.facebook.com/lapukdee/"
-#property version    EA_Version
+#property version    EA_Version;
 
 #property   description    "Account Allow : "+eaLOCK_Account
 #property   description    "Expire Date : "+eaLOCK_Date
@@ -338,11 +338,6 @@ void OnTick()
 
       GUI();
       //Print(__FUNCTION__, "#", __LINE__);
-   }
-//---
-   {
-      double   Temp = "Temp";
-      //Program.Running = true;
    }
 //---
    bool  OnClose  = false;

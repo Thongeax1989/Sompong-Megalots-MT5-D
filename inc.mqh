@@ -24,7 +24,7 @@ enum ENUM_OrderCommentPos {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-input   string               exEAname          = "v" + string(EA_Version);          //# Megalots
+input   string               exEAname          = "v" + string(EA_Version) + "-MT5";        //# Megalots
 input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
 input   int                  exMagicnumber     =  10022023;         //• Magicnumber
 input   string               exOrder_1         =  ""; //-

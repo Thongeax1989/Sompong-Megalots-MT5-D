@@ -157,8 +157,6 @@ public:
       void           ClearDynamic()
       {
 
-
-
          ActivePlace_TOP = -1;
          ActivePlace_BOT = 9999999999;
 

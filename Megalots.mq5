@@ -3,16 +3,43 @@
 //|                           Copyright 2023 Thongeak - Development. |
 //|                               https://www.facebook.com/lapukdee/ |
 //+------------------------------------------------------------------+
-#include "inc.mqh"
 
+#define     eaLOCK_Account ""
+/*
+   #Example.
+   "45843128,80000007"     => allow 2 acc.
+   ""                      => Account not locked
+
+*/
+#define     eaLOCK_Date    ""
+/*
+   - Compared to the center time +0
+   #Example.
+   "31.12.2023"   => Day,Month,Year
+   ""             => Unlimited
+
+*/
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+#define EA_Version   "1.00"
+//---
 #property copyright "Copyright 2023 Thongeak - Development."
 #property link      "https://www.facebook.com/lapukdee/"
 #property version    EA_Version
+
+#property   description    "Account Allow : "+eaLOCK_Account
+#property   description    "Expire Date : "+eaLOCK_Date
 
 /**
 https://www.mql5.com/en/articles/81    MQL4  to MQL5
 **/
 
+#define     EA_Identity          "MLot"    //OrderName
+#define     EA_Identity_Short    "MLO"
+
+#include "inc.mqh"
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -393,7 +420,7 @@ void OnTick()
                   if(Port.docker.ActivePoint_TOP <= esStopLoss_Distance_Point ||
                      Port.docker.ActivePoint_BOT <= esStopLoss_Distance_Point) {
 
-                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",Port.docker.ActivePoint_TOP,",",Port.docker.ActivePoint_BOT,"]");
+                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",DoubleToString(Port.docker.ActivePoint_TOP,0),"TopPoint,",DoubleToString(Port.docker.ActivePoint_BOT,0),"TopPoint]");
                      OrderCloseAll(-1);
                      OrderDeleteAll(__LINE__);     //My Order
 
@@ -437,28 +464,7 @@ void OnTick()
 //---
    Port.Order_Callculator();
 
-   {
-      Comments.add("#Version", EA_Version);
-      Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
 
-      Comments.add("Program.Running ", Program.Running );
-      Comments.newline();
-
-      Comments.add("Port.ActivePlace_TOP", DoubleToString(Port.docker.ActivePlace_TOP, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_TOP,0));
-      Comments.add("Port.ActivePlace_BOT", DoubleToString(Port.docker.ActivePlace_BOT, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_BOT,0));
-      Comments.newline();
-
-      Comments.add("Docker_total", Docker.Global.Docker_total, 0);
-      Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
-      Comments.newline();
-
-      Comments.add("Buy",string(Port.Buy.CNT_Avtive) + " / " + string(Port.Buy.CNT_Pending) + " = " + DoubleToString(Port.Buy.Sum_ActiveHold,4));
-      Comments.add("Sell",string(Port.Sell.CNT_Avtive) + " / " + string(Port.Sell.CNT_Pending) + " = " + DoubleToString(Port.Sell.Sum_ActiveHold,4));
-      Comments.add("All",string(Port.All.CNT_Avtive) + " / " + string(Port.All.CNT_Pending) + " = " + DoubleToString(Port.All.Sum_ActiveHold,4));
-      Comments.newline();
-
-      Comments.Show();
-   }
 
 
 //---
@@ -799,13 +805,4 @@ string   UninitializeReason(int  reason)
    }
    return   "-";
 }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void  GUI()
-{
-}
-
-//+------------------------------------------------------------------+
-
 //+------------------------------------------------------------------+

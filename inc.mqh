@@ -3,10 +3,7 @@
 //|                           Copyright 2023 Thongeak - Development. |
 //|                               https://www.facebook.com/lapukdee/ |
 //+------------------------------------------------------------------+
-#define EA_Version   "1.00"
 
-#define     EA_Identity          "MLot"    //OrderName
-#define     EA_Identity_Short    "MLO"
 //---
 enum ENUM_ProfitTake {
    ENUM_ProfitTakeBuySell,    //+ Buy,Sell
@@ -68,7 +65,11 @@ input   double               exComm_Lot       = 9;   //• Commission/Lot [ Stan
 
 input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
 input   bool                 exPlaysound_OnClose  = true;   //• OnClose
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+#include "inc_Docker.mqh"
+#include "GUI.mqh"
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -217,11 +218,13 @@ public:
                   if(__POSITION_TYPE == POSITION_TYPE_BUY) {
 
                      Buy.CNT_Avtive++;
+                     Buy.Sum_Lot       += __POSITION_VOLUME;
                      Buy.Sum_ActiveHold += __POSITION_PROFIT;
                   }
                   if(__POSITION_TYPE == POSITION_TYPE_SELL) {
 
                      Sell.CNT_Avtive++;
+                     Sell.Sum_Lot       += __POSITION_VOLUME;
                      Sell.Sum_ActiveHold += __POSITION_PROFIT;
                   }
                   All.CNT_Avtive    =  Buy.CNT_Avtive + Sell.CNT_Avtive;
@@ -403,7 +406,7 @@ private:
 
 CPort Port  =  new CPort;
 //+------------------------------------------------------------------+
-#include "inc_Docker.mqh"
+
 
 
 

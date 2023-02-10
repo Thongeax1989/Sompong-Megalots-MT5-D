@@ -431,16 +431,19 @@ void OnTick()
    {
       Comments.add("#Version", EA_Version);
       Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
-
-      Comments.add("Dev.LINE_Init", Dev.LINE_Init, 0);
-      Comments.newline();
+      
+      Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
+      Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
 
       Comments.add("Docker_total", Docker.Global.Docker_total, 0);
       Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
-
-      Comments.add("cnt_All",Port.All.CNT_Avtive);
       Comments.newline();
 
+      Comments.add("Buy.Sum_ActiveHold", Port.Buy.Sum_ActiveHold, 4);
+      Comments.add("Sell.Sum_ActiveHold",  Port.Sell.Sum_ActiveHold, 4);
+      Comments.add("All.Sum_ActiveHold",  Port.All.Sum_ActiveHold, 4);
+      Comments.newline();
+      
       Comments.add("Buy.CNT_Pending", Port.Buy.CNT_Pending);
       Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Pending);
       Comments.add("All.CNT_Pending", Port.All.CNT_Pending);
@@ -450,14 +453,6 @@ void OnTick()
       Comments.add("Sell.CNT_Avtive", Port.Sell.CNT_Avtive);
       Comments.add("All.CNT_Avtive", Port.All.CNT_Avtive);
       Comments.newline();
-
-      Comments.add("Buy.Sum_ActiveHold", Port.Buy.Sum_ActiveHold, 4);
-      Comments.add("Sell.Sum_ActiveHold",  Port.Sell.Sum_ActiveHold, 4);
-      Comments.add("All.Sum_ActiveHold",  Port.All.Sum_ActiveHold, 4);
-      Comments.newline();
-
-      Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
-      Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
 
       Comments.Show();
    }

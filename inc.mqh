@@ -9,7 +9,7 @@
 #define     EA_Identity_Short    "MLO"
 //---
 enum ENUM_ProfitTake {
-   ENUM_ProfitTakeBuySell,    //+ Buy,Sell [Update v1.7]
+   ENUM_ProfitTakeBuySell,    //+ Buy,Sell
    ENUM_ProfitTakeAll,        //+ Original(Holding.Nav)
    ENUM_ProfitTakeAllInc      //+ Profit + Lot Inc.Lot
 };
@@ -48,8 +48,8 @@ input   double               exOrder_Lot_Buy_2   =  0.01;           //• Lot Bu
 input   string               exProfit                   =  " --------------- Take Profit --------------- ";   // --------------------------------------------------
 input   double               exProfit_TakeTraget        =  30;                  //• TP ($) : All
 input   ENUM_ProfitTake      exProfit_MODE              =  ENUM_ProfitTakeAll;  //• Mode
-input   double               exProfit_TakeTraget_SELL   =  30;                  //• TP ($) : Sell *Update v1.7
-input   double               exProfit_TakeTraget_BUY_   =  30;                  //• TP ($) : Buy *Update v1.7
+input   double               exProfit_TakeTraget_SELL   =  30;                  //• TP ($) : Sell
+input   double               exProfit_TakeTraget_BUY_   =  30;                  //• TP ($) : Buy
 
 input   string               exStopLoss              =  " --------------- Stop Loss --------------- ";   // --------------------------------------------------
 input   string               exStopLoss_EQ           =  ".";                 //--------------- Equity ---------------
@@ -88,12 +88,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-      SOrder()
+                     SOrder()
       {
          Clear();
       }
       //--- Destructor
-      ~SOrder()
+                    ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -127,7 +127,7 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-      SDocker()
+                     SDocker()
       {
          Point_Distance    = -1;
          Price_Master      = -1;
@@ -137,13 +137,13 @@ public:
    };
    SDocker           docker;
 
-   CPort()
+                     CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-   ~CPort()
+                    ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -155,12 +155,6 @@ public:
       Sell.Clear();
       All.Clear();
       //---
-
-
-      /* Mock Data*/
-      int   __EA_Magic  =  0;
-      //---
-
 
       int   __Port_CNT_Avtive  = PositionsTotal();
       if(true) { /* For Active loop*/
@@ -180,7 +174,7 @@ public:
                //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
 
                long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-               if(__POSITION_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+               if(__POSITION_MAGIC == exMagicnumber) {                  //*__EA_Magic fillter
 
                   long     __POSITION_TYPE      = PositionGetInteger(POSITION_TYPE);
                   //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket, " | __POSITION_TYPE : ", __POSITION_TYPE);
@@ -202,6 +196,7 @@ public:
 
                   //
                   All.Sum_ActiveHold = __POSITION_PROFIT;
+                  All.CNT_Avtive =  Buy.CNT_Avtive + Sell.CNT_Avtive;
 //---
                   if(docker.Price_Master   ==  -1) {
                      getZoneStamp(PositionGetString(POSITION_COMMENT));
@@ -232,7 +227,7 @@ public:
                //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
                long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-               if(__ORDER_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+               if(__ORDER_MAGIC == exMagicnumber) {                  //*__EA_Magic fillter
 
                   long     __ORDER_TYPE      = OrderGetInteger(ORDER_TYPE);
                   //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket, " | __ORDER_TYPE : ", __ORDER_TYPE);
@@ -288,7 +283,7 @@ public:
 
          docker.Price_Master      =  StringToDouble(result[Pos_MasterPrice]);
 
-         Docker.Global.Zone_PPlaceMODE   =  ENUM_PlacePending(result[Pos_ModePlace]);
+         docker.Zone_PPlaceMODE   =  ENUM_PlacePending(result[Pos_ModePlace]);
 
          {
             //Docker_total   = StrToInteger(result[2]);
@@ -301,7 +296,7 @@ public:
 
          }
 
-         Docker.Global.Point_Distance = int(StringToInteger(result[Pos_Distance]));
+         docker.Point_Distance = int(StringToInteger(result[Pos_Distance]));
 
          return   true;
       }
@@ -326,8 +321,8 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-   CProductLock(void) {};
-   ~CProductLock(void) {};
+                     CProductLock(void) {};
+                    ~CProductLock(void) {};
 
    bool              Checker()
    {
@@ -372,7 +367,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-   sProgram()
+                     sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -769,12 +764,12 @@ bool  OrderCloseAll()
 class CComment
 {
 public:
-   CComment(void)
+                     CComment(void)
    {
       text_clear();
       Comment("");
    };
-   ~CComment(void) {};
+                    ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

@@ -16,13 +16,16 @@ https://www.mql5.com/en/articles/81    MQL4  to MQL5
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-bool  DEV_Clear   =  0;
+//bool  DEV_Clear   =  0;
+//---
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int OnInit()
 {
 //--- create timer
    EventSetTimer(60);
-
-   ChartSetInteger(0,CHART_SHOW_GRID,false);
 
    Print(" ----------------------------------------------------------------------------------------- ");
    Print(" ----------------------------------------------------------------------------------------- ");
@@ -43,6 +46,8 @@ int OnInit()
       }
 
       Port.Order_Callculator();
+      Print(__FUNCTION__,"-->Port.Order_Callculator()", "#", __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
+
       {
          ProduckLock.Checker();
          //Program.ProduckLock =  ProduckLock.EA_Allow;
@@ -53,15 +58,20 @@ int OnInit()
          Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.docker.Price_Master);
 
       } else {
+         Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.docker.Price_Master);
+
          Program.Running = false;
+         Print(__FUNCTION__, "#", __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
 
          if(Port.All.CNT_Avtive > 0) {
+            Print(__FUNCTION__, "#", __LINE__);
 
             Docker.Global.Price_Master =  Port.docker.Price_Master;
 
             if(UninitializeReason() == REASON_PARAMETERS) {
 
                Dev.LINE_Init = __LINE__;
+               Print(__FUNCTION__, "#", __LINE__);
 
                Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
 
@@ -73,6 +83,7 @@ int OnInit()
             } else {
 
                Dev.LINE_Init = __LINE__;
+               Print(__FUNCTION__, "#", __LINE__);
 
                Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
 
@@ -82,7 +93,7 @@ int OnInit()
                Docker.Global.Docker_total_2 = Port.docker.Docker_total_2;
 
                Docker.Global.Point_Distance = Port.docker.Point_Distance;
-               Docker.Global.Price_Distance = Docker.Global.Point_Distance * _Point;
+               Docker.Global.Price_Distance = Port.docker.Point_Distance * _Point;
 
             }
 
@@ -113,6 +124,7 @@ int OnInit()
          } else { /*--- None Active Case ---*/
 
             Dev.LINE_Init = __LINE__;
+            Print(__FUNCTION__, "#", __LINE__);
 
             int   Reason   =  UninitializeReason();
             Print("Reason : ", Reason);
@@ -156,6 +168,7 @@ int OnInit()
                } else { /*--- Master Prive are negative ---*/
 
                   Dev.LINE_Init = __LINE__;
+                  Print(__FUNCTION__, "#", __LINE__);
 
                   //--- Stop
 
@@ -175,6 +188,8 @@ int OnInit()
          }
          //---
          {
+            Print(__FUNCTION__, "#", __LINE__);
+
             ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_HLINE);
             ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_LABEL);
             ObjectsDeleteAll(0, EA_Identity_Short, 0, OBJ_EDIT);
@@ -186,12 +201,15 @@ int OnInit()
 
          }
          {
+            Print(__FUNCTION__, "#", __LINE__);
             Program.Running = ProduckLock.Passport(false);
             //Program.Running   = true;
          }
       }
    }
    {
+      Print(__FUNCTION__, "#", __LINE__);
+
       Comments.add("#Version", EA_Version);
 
       Comments.add("Dev.LINE_Init", Dev.LINE_Init, 0);
@@ -200,7 +218,7 @@ int OnInit()
       Comments.add("Docker_total", Docker.Global.Docker_total, 0);
       Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
 
-      //Comments.add("cnt_All",Port.cnt_All);
+      Comments.add("cnt_All",Port.All.CNT_Avtive);
       //Comments.newline();
 
       //Comments.add("sumHold_Buy",Port.sumHold_Buy,2);
@@ -263,8 +281,9 @@ void OnTick()
    CMM += "Port.All.CNT_Pending" + " : " +  IntegerToString(Port.All.CNT_Pending) + "\n";
 
 //---
-   if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) &&
-      DEV_OneTick && !DEV_Clear) {
+   if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
+      //&&DEV_OneTick && !DEV_Clear
+     ) {
 
       CMM_Dock_UP = "\n";
       CMM_Dock_DW = "\n";
@@ -328,7 +347,7 @@ void OnTick()
    CMM += CMM_Dock_DW;
 
 //---
-   Comment(CMM);
+   //Comment(CMM);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -449,7 +468,7 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-   Print(__FUNCTION__"#", __LINE__);
+   //Print(__FUNCTION__"#", __LINE__);
    //OnTick();
 }
 //+------------------------------------------------------------------+

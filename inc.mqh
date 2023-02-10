@@ -63,6 +63,11 @@ double                        esStopLoss_Distance_Point  =  -1;
 input   string               exComm           = " --------------- Commission  --------------- ";   // --------------------------------------------------
 input   double               exComm_Lot       = 9;   //• Commission/Lot [ Standard ]
 
+input   string               exColor          = " --------------- Color  --------------- ";   // --------------------------------------------------
+input   color                exColor_clrMaster  = clrDeepPink;   //• Master Price
+input   color                exColor_clrBuy  = clrRoyalBlue;   //• Master Price
+input   color                exColor_clrSell  = clrTomato;   //• Master Price
+
 input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
 input   bool                 exPlaysound_OnClose  = true;   //• OnClose
 //+------------------------------------------------------------------+

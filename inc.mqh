@@ -92,12 +92,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-      SOrder()
+                     SOrder()
       {
          Clear();
       }
       //--- Destructor
-      ~SOrder()
+                    ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -131,7 +131,7 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-      SDocker()
+                     SDocker()
       {
          Clear();
       }
@@ -143,9 +143,9 @@ public:
       void           ClearStatic()
       {
          Price_Master      = -1;
-         
+
          Zone_PPlaceMODE   = -1;
-         
+
          Docker_DistancePoint    = -1;
          Docker_total_1          = -1;
          Docker_total_2          = -1;
@@ -165,13 +165,13 @@ public:
    };
    SDocker           docker;
 
-   CPort()
+                     CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-   ~CPort()
+                    ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -415,11 +415,15 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-   CProductLock(void) {};
-   ~CProductLock(void) {};
+                     CProductLock(void) {};
+                    ~CProductLock(void) {};
 
    bool              Checker()
    {
+      /* Bypass */
+      double   Bypass   =  "Bypass";
+      ProduckLock.EA_Allow = true;
+      /* Bypass */
 
       return   true;
    }
@@ -441,7 +445,7 @@ public:
       } else {
          if(action) {
             if(Port.All.CNT_Pending > 0) {
-               OrderDeleteAll();
+               OrderDeleteAll(__LINE__);
             }
          }
       }
@@ -471,7 +475,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-   sProgram()
+                     sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -692,6 +696,10 @@ bool  OrderDocker_RememberFindDock(ulong OrderTicket_, double  OrderOpenPrice_, 
 //+------------------------------------------------------------------+
 bool OrderDelete(ulong  OrderDelete_Ticket)
 {
+   if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
+      return   false;
+   }
+
 //--- declare and initialize the trade request and result of trade request
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
@@ -714,8 +722,11 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  OrderDeleteAll()
+bool  OrderDeleteAll(int  CommandByLine)
 {
+   if(CommandByLine != -1) {
+      Print(__FUNCTION__, "#", __LINE__, " CommandByLine ",CommandByLine);
+   }
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -874,12 +885,12 @@ bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 class CComment
 {
 public:
-   CComment(void)
+                     CComment(void)
    {
       text_clear();
       Comment("");
    };
-   ~CComment(void) {};
+                    ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

@@ -122,7 +122,7 @@ int OnInit()
                   //__Order_Close(-1);
 
                   //--- OrderDelete
-                  OrderDeleteAll();
+                  OrderDeleteAll(__LINE__);
                }
 
                Docker.Docker_Define();
@@ -174,7 +174,7 @@ int OnInit()
                      //__Order_Close(-1);
 
                      //--- OrderDelete
-                     OrderDeleteAll();
+                     OrderDeleteAll(__LINE__);
                   }
 
                   Docker.Docker_Define();
@@ -194,7 +194,7 @@ int OnInit()
                      //__Order_Close(-1);
 
                      //--- OrderDelete
-                     OrderDeleteAll();
+                     OrderDeleteAll(__LINE__);
                   }
 
                }
@@ -304,7 +304,7 @@ void OnTick()
          Program.Running   =  ProduckLock.Passport(false);
 
          if(ProduckLock.EA_Allow == false) {
-            OrderDeleteAll();
+            OrderDeleteAll(__LINE__);
          }
       }
 
@@ -313,7 +313,7 @@ void OnTick()
    }
 //---
    {
-      double   Mark = "1";
+      double   Temp = "Temp";
       Program.Running = true;
    }
 //---
@@ -378,7 +378,7 @@ void OnTick()
                   //PlaySound("alert");
                   Print(__LINE__,"#",__FUNCTION__," Stoploss-Equity | ",Act_EQ," : ",exStopLoss_EQ_CutValue);
                   OrderCloseAll(-1);
-                  OrderDeleteAll();     //My Order
+                  OrderDeleteAll(__LINE__);     //My Order
 
                   Program.Running   =  false;
 
@@ -397,7 +397,7 @@ void OnTick()
 
                      Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",Port.docker.ActivePoint_TOP,",",Port.docker.ActivePoint_BOT,"]");
                      OrderCloseAll(-1);
-                     OrderDeleteAll();     //My Order
+                     OrderDeleteAll(__LINE__);     //My Order
 
                      Program.Running   =  false;
 

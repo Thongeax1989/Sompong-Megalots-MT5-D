@@ -92,12 +92,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-      SOrder()
+                     SOrder()
       {
          Clear();
       }
       //--- Destructor
-      ~SOrder()
+                    ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -131,36 +131,46 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-      SDocker()
+                     SDocker()
       {
          Clear();
       }
       void           Clear()
       {
-         Point_Distance    = -1;
+         ClearStatic();
+         ClearDynamic();
+      }
+      void           ClearStatic()
+      {
          Price_Master      = -1;
 
          Zone_PPlaceMODE   = -1;
 
          Docker_total_1 = -1;
          Docker_total_2 = -1;
+      }
+      void           ClearDynamic()
+      {
+         Point_Distance    = -1;
+
 
          ActivePlace_TOP = -1;
-         ActivePlace_BOT = -1;
-         ActivePoint_TOP = -1;
-         ActivePoint_BOT = -1;
+         ActivePlace_BOT = 9999999999;
+
+         ActivePoint_TOP = 0;
+         ActivePoint_BOT = 0;
 
       }
    };
    SDocker           docker;
 
-   CPort()
+                     CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-   ~CPort()
+                    ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -171,6 +181,7 @@ public:
       Buy.Clear();
       Sell.Clear();
       All.Clear();
+      docker.ClearDynamic();
       //---
 
       int   __Port_CNT_Avtive  = PositionsTotal();
@@ -403,8 +414,8 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-   CProductLock(void) {};
-   ~CProductLock(void) {};
+                     CProductLock(void) {};
+                    ~CProductLock(void) {};
 
    bool              Checker()
    {
@@ -459,7 +470,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-   sProgram()
+                     sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -862,12 +873,12 @@ bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 class CComment
 {
 public:
-   CComment(void)
+                     CComment(void)
    {
       text_clear();
       Comment("");
    };
-   ~CComment(void) {};
+                    ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

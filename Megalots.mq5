@@ -95,14 +95,14 @@ int OnInit()
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_total_2: ", Port.docker.Docker_total_2);
 
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Zone_PPlaceMODE : ", Port.docker.Zone_PPlaceMODE);
-               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Point_Distance : ", Port.docker.Point_Distance);
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_DistancePoint : ", Port.docker.Docker_DistancePoint);
 
                Docker.Global.Docker_total =   Zone_getCNT(Port.docker.Docker_total_1, Port.docker.Docker_total_2, Docker.Global.Zone_PPlaceMODE);
 
                Docker.Global.Docker_total_1 = Port.docker.Docker_total_1;
                Docker.Global.Docker_total_2 = Port.docker.Docker_total_2;
 
-               Docker.Global.Point_Distance = Port.docker.Point_Distance;
+               Docker.Global.Point_Distance = Port.docker.Docker_DistancePoint;
                Docker.Global.Price_Distance = Docker.Global.Point_Distance * _Point;
 
             }

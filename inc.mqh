@@ -92,12 +92,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-                     SOrder()
+      SOrder()
       {
          Clear();
       }
       //--- Destructor
-                    ~SOrder()
+      ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -123,7 +123,7 @@ public:
 
    struct SDocker {
       double               Price_Master;
-      int                  Point_Distance;
+      int                  Docker_DistancePoint;
       ENUM_PlacePending    Zone_PPlaceMODE;
 
       int                  Docker_total_1, Docker_total_2;
@@ -131,7 +131,7 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-                     SDocker()
+      SDocker()
       {
          Clear();
       }
@@ -143,15 +143,16 @@ public:
       void           ClearStatic()
       {
          Price_Master      = -1;
-
+         
          Zone_PPlaceMODE   = -1;
-
-         Docker_total_1 = -1;
-         Docker_total_2 = -1;
+         
+         Docker_DistancePoint    = -1;
+         Docker_total_1          = -1;
+         Docker_total_2          = -1;
       }
       void           ClearDynamic()
       {
-         Point_Distance    = -1;
+
 
 
          ActivePlace_TOP = -1;
@@ -164,13 +165,13 @@ public:
    };
    SDocker           docker;
 
-                     CPort()
+   CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-                    ~CPort()
+   ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -369,8 +370,8 @@ private:
 
          }
 
-         docker.Point_Distance = int(StringToInteger(result[Pos_Distance]));
-         Print(__FUNCTION__"#", __LINE__, " docker.Point_Distance : ", docker.Point_Distance);
+         docker.Docker_DistancePoint = int(StringToInteger(result[Pos_Distance]));
+         Print(__FUNCTION__"#", __LINE__, " docker.Point_Distance : ", docker.Docker_DistancePoint);
 
          Print(__FUNCTION__"#", __LINE__);
          return   true;
@@ -414,8 +415,8 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-                     CProductLock(void) {};
-                    ~CProductLock(void) {};
+   CProductLock(void) {};
+   ~CProductLock(void) {};
 
    bool              Checker()
    {
@@ -470,7 +471,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-                     sProgram()
+   sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -873,12 +874,12 @@ bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 class CComment
 {
 public:
-                     CComment(void)
+   CComment(void)
    {
       text_clear();
       Comment("");
    };
-                    ~CComment(void) {};
+   ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

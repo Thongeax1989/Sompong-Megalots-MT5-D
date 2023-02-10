@@ -88,12 +88,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-                     SOrder()
+      SOrder()
       {
          Clear();
       }
       //--- Destructor
-                    ~SOrder()
+      ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -127,23 +127,36 @@ public:
       double               ActivePlace_TOP,ActivePlace_BOT;
       double               ActivePoint_TOP,ActivePoint_BOT;
 
-                     SDocker()
+      SDocker()
+      {
+         Clear();
+      }
+      void  Clear()
       {
          Point_Distance    = -1;
          Price_Master      = -1;
 
          Zone_PPlaceMODE   = -1;
+
+         Docker_total_1 = -1;
+         Docker_total_2 = -1;
+
+         ActivePlace_TOP = -1;
+         ActivePlace_BOT = -1;
+         ActivePoint_TOP = -1;
+         ActivePoint_BOT = -1;
+
       }
    };
    SDocker           docker;
 
-                     CPort()
+   CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-                    ~CPort()
+   ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -198,7 +211,10 @@ public:
                   All.Sum_ActiveHold = __POSITION_PROFIT;
                   All.CNT_Avtive =  Buy.CNT_Avtive + Sell.CNT_Avtive;
 //---
+                  //Print(__FUNCTION__, "#", __LINE__, " docker.Price_Master: ", docker.Price_Master);
                   if(docker.Price_Master   ==  -1) {
+                     Print(__FUNCTION__, "#", __LINE__);
+
                      getZoneStamp(PositionGetString(POSITION_COMMENT));
                   }
                   //---
@@ -268,38 +284,52 @@ public:
       //Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
 
       //---
+
       Buy.Decimal();
       Sell.Decimal();
       All.Decimal();
+
+      //Print(__FUNCTION__"#", __LINE__);
       return            true;
    }
 
    bool              getZoneStamp(string  OrderComment__)
    {
+      Print(__FUNCTION__"#", __LINE__);
 
       string result[];
       int k = StringSplit(OrderComment__, StringGetCharacter("|", 0), result);
+
+      Print(__FUNCTION__"#", __LINE__, " OrderComment__ : ", OrderComment__," | k:",k);
       if(k == 5) {
 
          docker.Price_Master      =  StringToDouble(result[Pos_MasterPrice]);
+         Print(__FUNCTION__"#", __LINE__, " docker.Price_Master : ", docker.Price_Master);
 
          docker.Zone_PPlaceMODE   =  ENUM_PlacePending(result[Pos_ModePlace]);
+         Print(__FUNCTION__"#", __LINE__, " docker.Zone_PPlaceMODE : ", docker.Zone_PPlaceMODE);
 
          {
             //Docker_total   = StrToInteger(result[2]);
             string arrDocker_total[];
             k = StringSplit(result[Pos_N1N2], StringGetCharacter(",", 0), arrDocker_total);
             if(k == 2) {
-               Docker.Global.Docker_total_1 = int(arrDocker_total[0]);
-               Docker.Global.Docker_total_2 = int(arrDocker_total[1]);
+               docker.Docker_total_1 = int(arrDocker_total[0]);
+               docker.Docker_total_2 = int(arrDocker_total[1]);
+               Print(__FUNCTION__"#", __LINE__, " docker.Docker_total_1 : ", docker.Docker_total_1);
+               Print(__FUNCTION__"#", __LINE__, " docker.Docker_total_2 : ", docker.Docker_total_2);
+
             }
 
          }
 
          docker.Point_Distance = int(StringToInteger(result[Pos_Distance]));
+         Print(__FUNCTION__"#", __LINE__, " docker.Point_Distance : ", docker.Point_Distance);
 
+         Print(__FUNCTION__"#", __LINE__);
          return   true;
       }
+      Print(__FUNCTION__"#", __LINE__);
       return   false;
    }
 
@@ -321,8 +351,8 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-                     CProductLock(void) {};
-                    ~CProductLock(void) {};
+   CProductLock(void) {};
+   ~CProductLock(void) {};
 
    bool              Checker()
    {
@@ -367,7 +397,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-                     sProgram()
+   sProgram()
    {
       Running        =  false;
       ProduckLock    =  false;
@@ -764,12 +794,12 @@ bool  OrderCloseAll()
 class CComment
 {
 public:
-                     CComment(void)
+   CComment(void)
    {
       text_clear();
       Comment("");
    };
-                    ~CComment(void) {};
+   ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

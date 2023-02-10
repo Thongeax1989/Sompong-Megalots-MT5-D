@@ -86,6 +86,14 @@ int OnInit()
                Print(__FUNCTION__, "#", __LINE__);
 
                Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
+               
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Price_Master : ", Port.docker.Price_Master);
+
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_total_1 : ", Port.docker.Docker_total_1);
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_total_2: ", Port.docker.Docker_total_2);
+               
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Zone_PPlaceMODE : ", Port.docker.Zone_PPlaceMODE);
+               Print(__FUNCTION__, "#", __LINE__, " Port.docker.Point_Distance : ", Port.docker.Point_Distance);
 
                Docker.Global.Docker_total =   Zone_getCNT(Port.docker.Docker_total_1, Port.docker.Docker_total_2, Docker.Global.Zone_PPlaceMODE);
 
@@ -93,7 +101,7 @@ int OnInit()
                Docker.Global.Docker_total_2 = Port.docker.Docker_total_2;
 
                Docker.Global.Point_Distance = Port.docker.Point_Distance;
-               Docker.Global.Price_Distance = Port.docker.Point_Distance * _Point;
+               Docker.Global.Price_Distance = Docker.Global.Point_Distance * _Point;
 
             }
 
@@ -101,9 +109,9 @@ int OnInit()
 
             {
                Docker.Global.Docker_total   =  ArrayResize(Docker.Docker, Docker.Global.Docker_total);
-               Print(__FUNCTION__, " Docker_total : ", Docker.Global.Docker_total);
-               Print(__FUNCTION__, " Docker_total_1 : ", Docker.Global.Docker_total_1);
-               Print(__FUNCTION__, " Docker_total_2 : ", Docker.Global.Docker_total_2);
+               Print(__FUNCTION__, "#", __LINE__, " Docker_total : ", Docker.Global.Docker_total);
+               Print(__FUNCTION__, "#", __LINE__, " Docker_total_1 : ", Docker.Global.Docker_total_1);
+               Print(__FUNCTION__, "#", __LINE__, " Docker_total_2 : ", Docker.Global.Docker_total_2);
 
                {
                   ObjectsDeleteAll(0, 0, -1);
@@ -118,7 +126,11 @@ int OnInit()
                Docker.Docker_Define();
                Docker.Docker_ObjDrawing();
 
-               OrderDocker_Remember();
+               {
+                  Print(__FUNCTION__, "#", __LINE__);
+                  Port.docker.Clear();
+                  OrderDocker_Remember();
+               }
             }
 
          } else { /*--- None Active Case ---*/

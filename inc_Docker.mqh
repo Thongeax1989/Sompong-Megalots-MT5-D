@@ -59,7 +59,7 @@ public:
    {
       Print(__FUNCTION__"#", __LINE__);
 
-      Main();
+      //Main();
 
    };
    ~CDocker(void)

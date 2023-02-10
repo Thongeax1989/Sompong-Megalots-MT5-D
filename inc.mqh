@@ -9,7 +9,7 @@
 #define     EA_Identity_Short    "MLO"
 //---
 enum ENUM_ProfitTake {
-   ENUM_ProfitTakeBuySell,    //+ Buy,Sell [Update v1.7]
+   ENUM_ProfitTakeBuySell,    //+ Buy,Sell
    ENUM_ProfitTakeAll,        //+ Original(Holding.Nav)
    ENUM_ProfitTakeAllInc      //+ Profit + Lot Inc.Lot
 };
@@ -29,7 +29,7 @@ enum ENUM_OrderCommentPos {
 //+------------------------------------------------------------------+
 input   string               exEAname          = "v" + string(EA_Version);          //# Megalots
 input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
-input   int                  exMagicnumber     =  26102022;         //• Magicnumber
+input   int                  exMagicnumber     =  10022023;         //• Magicnumber
 input   string               exOrder_1         =  ""; //-
 input   double               exZone_PriceStart =  0;                //• Price Start (0 = Current of Bid Price)
 input   int                  exZone_Distance   =  50;               //• Distance
@@ -48,8 +48,8 @@ input   double               exOrder_Lot_Buy_2   =  0.01;           //• Lot Bu
 input   string               exProfit                   =  " --------------- Take Profit --------------- ";   // --------------------------------------------------
 input   double               exProfit_TakeTraget        =  30;                  //• TP ($) : All
 input   ENUM_ProfitTake      exProfit_MODE              =  ENUM_ProfitTakeAll;  //• Mode
-input   double               exProfit_TakeTraget_SELL   =  30;                  //• TP ($) : Sell *Update v1.7
-input   double               exProfit_TakeTraget_BUY_   =  30;                  //• TP ($) : Buy *Update v1.7
+input   double               exProfit_TakeTraget_SELL   =  30;                  //• TP ($) : Sell
+input   double               exProfit_TakeTraget_BUY_   =  30;                  //• TP ($) : Buy
 
 input   string               exStopLoss              =  " --------------- Stop Loss --------------- ";   // --------------------------------------------------
 input   string               exStopLoss_EQ           =  ".";                 //--------------- Equity ---------------
@@ -72,6 +72,10 @@ struct sDev {
    int               LINE_Init;
 };
 sDev  Dev = {-1};
+enum eState_Ontick {
+   eStateTick_Normal,
+   eStateTick_CloseAll
+};
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -119,7 +123,7 @@ public:
 
    struct SDocker {
       double               Price_Master;
-      int                  Point_Distance;
+      int                  Docker_DistancePoint;
       ENUM_PlacePending    Zone_PPlaceMODE;
 
       int                  Docker_total_1, Docker_total_2;
@@ -129,10 +133,34 @@ public:
 
       SDocker()
       {
-         Point_Distance    = -1;
+         Clear();
+      }
+      void           Clear()
+      {
+         ClearStatic();
+         ClearDynamic();
+      }
+      void           ClearStatic()
+      {
          Price_Master      = -1;
-
+         
          Zone_PPlaceMODE   = -1;
+         
+         Docker_DistancePoint    = -1;
+         Docker_total_1          = -1;
+         Docker_total_2          = -1;
+      }
+      void           ClearDynamic()
+      {
+
+
+
+         ActivePlace_TOP = -1;
+         ActivePlace_BOT = 9999999999;
+
+         ActivePoint_TOP = 0;
+         ActivePoint_BOT = 0;
+
       }
    };
    SDocker           docker;
@@ -154,13 +182,8 @@ public:
       Buy.Clear();
       Sell.Clear();
       All.Clear();
+      docker.ClearDynamic();
       //---
-
-
-      /* Mock Data*/
-      int   __EA_Magic  =  0;
-      //---
-
 
       int   __Port_CNT_Avtive  = PositionsTotal();
       if(true) { /* For Active loop*/
@@ -180,7 +203,7 @@ public:
                //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket);
 
                long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-               if(__POSITION_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+               if(__POSITION_MAGIC == exMagicnumber) {                  //*__EA_Magic fillter
 
                   long     __POSITION_TYPE      = PositionGetInteger(POSITION_TYPE);
                   //Print(__FUNCTION__"#", __LINE__, " _PositionGetTicket : ", _PositionGetTicket, " | __POSITION_TYPE : ", __POSITION_TYPE);
@@ -199,11 +222,26 @@ public:
                      Sell.CNT_Avtive++;
                      Sell.Sum_ActiveHold += __POSITION_PROFIT;
                   }
+                  All.CNT_Avtive    =  Buy.CNT_Avtive + Sell.CNT_Avtive;
+                  All.Sum_Lot       += __POSITION_VOLUME;
+                  All.Sum_ActiveHold =  Buy.Sum_ActiveHold + Sell.Sum_ActiveHold;
+                  //---
 
-                  //
-                  All.Sum_ActiveHold = __POSITION_PROFIT;
-//---
+                  double   SIZE  =  SymbolInfoDouble(NULL, SYMBOL_TRADE_CONTRACT_SIZE) / 100000;
+
+                  All.CommHarvest =  exComm_Lot * All.Sum_Lot * SIZE;
+                  All.Profit_Inc  =  All.Sum_ActiveHold + All.CommHarvest;
+                  //---
+                  {
+                     docker.ActivePlace_TOP   =  MathMax(docker.ActivePlace_TOP,__POSITION_PRICE_OPEN);
+                     docker.ActivePlace_BOT   =  MathMin(docker.ActivePlace_BOT,__POSITION_PRICE_OPEN);
+                  }
+                  //---
+
+                  //Print(__FUNCTION__, "#", __LINE__, " docker.Price_Master: ", docker.Price_Master);
                   if(docker.Price_Master   ==  -1) {
+                     Print(__FUNCTION__, "#", __LINE__);
+
                      getZoneStamp(PositionGetString(POSITION_COMMENT));
                   }
                   //---
@@ -213,7 +251,26 @@ public:
          }
       } /*End : For Active loop + Module*/
 
+      {/* v1.64 */
+         //Global.Price_Master
+         if(All.CNT_Avtive > 0) {
 
+            double   Bid  =  SymbolInfoDouble(NULL,SYMBOL_BID);
+            double   Ask  =  SymbolInfoDouble(NULL,SYMBOL_ASK);
+
+            docker.ActivePoint_TOP = ( docker.ActivePlace_TOP - Ask) / _Point;
+            docker.ActivePoint_BOT = (Bid -  docker.ActivePlace_BOT) / _Point;
+
+            Draw_SumProduct(5,  docker.ActivePlace_TOP, clrYellow,"_ActivePlace_TOP");
+            Draw_SumProduct(5,  docker.ActivePlace_BOT, clrYellow,"_ActivePlace_BOT");
+
+         } else {
+            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_TOP");
+            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_BOT");
+         }
+      }
+
+      //+------------------------------------------------------------------+
 
       int   __Port_CNT_Pending = OrdersTotal();
       if(true) { /* For Pending loop*/
@@ -232,7 +289,7 @@ public:
                //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
                long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-               if(__ORDER_MAGIC == __EA_Magic) {                  //*__EA_Magic fillter
+               if(__ORDER_MAGIC == exMagicnumber) {                  //*__EA_Magic fillter
 
                   long     __ORDER_TYPE      = OrderGetInteger(ORDER_TYPE);
                   //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket, " | __ORDER_TYPE : ", __ORDER_TYPE);
@@ -273,39 +330,71 @@ public:
       //Print(__FUNCTION__"#", __LINE__, " All.CNT_Avtive : ", All.CNT_Avtive);
 
       //---
+
       Buy.Decimal();
       Sell.Decimal();
       All.Decimal();
+
+      //Print(__FUNCTION__"#", __LINE__);
       return            true;
    }
 
+private:
    bool              getZoneStamp(string  OrderComment__)
    {
+      Print(__FUNCTION__"#", __LINE__);
 
       string result[];
       int k = StringSplit(OrderComment__, StringGetCharacter("|", 0), result);
+
+      Print(__FUNCTION__"#", __LINE__, " OrderComment__ : ", OrderComment__," | k:",k);
       if(k == 5) {
 
          docker.Price_Master      =  StringToDouble(result[Pos_MasterPrice]);
+         Print(__FUNCTION__"#", __LINE__, " docker.Price_Master : ", docker.Price_Master);
 
-         Docker.Global.Zone_PPlaceMODE   =  ENUM_PlacePending(result[Pos_ModePlace]);
+         docker.Zone_PPlaceMODE   =  ENUM_PlacePending(result[Pos_ModePlace]);
+         Print(__FUNCTION__"#", __LINE__, " docker.Zone_PPlaceMODE : ", docker.Zone_PPlaceMODE);
 
          {
             //Docker_total   = StrToInteger(result[2]);
             string arrDocker_total[];
             k = StringSplit(result[Pos_N1N2], StringGetCharacter(",", 0), arrDocker_total);
             if(k == 2) {
-               Docker.Global.Docker_total_1 = int(arrDocker_total[0]);
-               Docker.Global.Docker_total_2 = int(arrDocker_total[1]);
+               docker.Docker_total_1 = int(arrDocker_total[0]);
+               docker.Docker_total_2 = int(arrDocker_total[1]);
+               Print(__FUNCTION__"#", __LINE__, " docker.Docker_total_1 : ", docker.Docker_total_1);
+               Print(__FUNCTION__"#", __LINE__, " docker.Docker_total_2 : ", docker.Docker_total_2);
+
             }
 
          }
 
-         Docker.Global.Point_Distance = int(StringToInteger(result[Pos_Distance]));
+         docker.Docker_DistancePoint = int(StringToInteger(result[Pos_Distance]));
+         Print(__FUNCTION__"#", __LINE__, " docker.Point_Distance : ", docker.Docker_DistancePoint);
 
+         Print(__FUNCTION__"#", __LINE__);
          return   true;
       }
+      Print(__FUNCTION__"#", __LINE__);
       return   false;
+   }
+
+   void              Draw_SumProduct(int OP, double Price, color Clr,string   name = "_SumProduct",bool  IsAdd_IdName = true)
+   {
+      string ObjTag = (IsAdd_IdName) ?
+                      EA_Identity_Short + name + string(OP) :
+                      name + string(OP);
+      //if(!ObjectCreate(chart_ID, name, OBJ_HLINE, sub_window, 0, price)) {
+
+      if(!ObjectCreate(0,ObjTag, OBJ_HLINE, 0, 0, Price)) {
+
+      }
+      if(ObjectMove(0, ObjTag, 0, 0, Price)) {
+      }
+      ObjectSetInteger(0, ObjTag, OBJPROP_BACK, false);
+      ObjectSetInteger(0, ObjTag, OBJPROP_COLOR, Clr);
+
    }
 
 };
@@ -355,6 +444,16 @@ public:
                OrderDeleteAll();
             }
          }
+      }
+      return   false;
+   }
+   bool              PassportIsTemp()
+   {
+      return   true;
+      //---
+
+      if(EA_Point == EA_AllowPoint) {
+         return   true;
       }
       return   false;
    }
@@ -593,10 +692,6 @@ bool  OrderDocker_RememberFindDock(ulong OrderTicket_, double  OrderOpenPrice_, 
 //+------------------------------------------------------------------+
 bool OrderDelete(ulong  OrderDelete_Ticket)
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data*/
-
 //--- declare and initialize the trade request and result of trade request
    MqlTradeRequest request = {};
    MqlTradeResult  result = {};
@@ -621,10 +716,6 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 //+------------------------------------------------------------------+
 bool  OrderDeleteAll()
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data# */
-
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -649,7 +740,7 @@ bool  OrderDeleteAll()
          //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
          long   __ORDER_MAGIC  =  OrderGetInteger(ORDER_MAGIC);
-         if(__ORDER_MAGIC == EXPERT_MAGIC) {
+         if(__ORDER_MAGIC == exMagicnumber) {
 
             ORDER_TICKET_CLOSE[i] = _OrderGetTicket;
             CountOfBox++;
@@ -692,12 +783,8 @@ bool  OrderDeleteAll()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  OrderCloseAll()
+bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 {
-   /* Mock Data*/
-   ulong   EXPERT_MAGIC  =  0;
-   /* Mock Data# */
-
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -722,10 +809,16 @@ bool  OrderCloseAll()
          //Print(__FUNCTION__"#", __LINE__, " _OrderGetTicket : ", _OrderGetTicket);
 
          long   __POSITION_MAGIC  =  PositionGetInteger(POSITION_MAGIC);
-         if(__POSITION_MAGIC == EXPERT_MAGIC) {
+         if(__POSITION_MAGIC == exMagicnumber) {
 
-            ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
-            CountOfBox++;
+            long   __POSITION_TYPE  =  PositionGetInteger(POSITION_TYPE);
+
+            if((OP_DIR == -1) || (OP_DIR != -1 &&  __POSITION_TYPE == OP_DIR)) {
+
+               ORDER_TICKET_CLOSE[i] = _PositionGetTicket;
+               CountOfBox++;
+
+            }
          }
 
       }
@@ -828,4 +921,6 @@ private:
    }
 };
 CComment Comments = new CComment;
+//+------------------------------------------------------------------+
+
 //+------------------------------------------------------------------+

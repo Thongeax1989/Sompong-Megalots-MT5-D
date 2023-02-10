@@ -39,7 +39,7 @@ int OnInit()
       //---
 
       int   reason   =  UninitializeReason() ;
-      Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", reason);
+      Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", UninitializeReason(reason));
 
       {
          esStopLoss_Distance_Point = NormalizeDouble(exStopLoss_Distance_Point * -1,_Digits);
@@ -56,6 +56,7 @@ int OnInit()
          //return(INIT_SUCCEEDED);
 
          Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.docker.Price_Master);
+         Program.Running = ProduckLock.Passport(false);
 
       } else {
          Print(__FUNCTION__, "#", __LINE__, " Port.Price_Master : ", Port.docker.Price_Master);
@@ -71,7 +72,7 @@ int OnInit()
             if(UninitializeReason() == REASON_PARAMETERS) {
 
                Dev.LINE_Init = __LINE__;
-               Print(__FUNCTION__, "#", __LINE__);
+               Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", UninitializeReason(reason));
 
                Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
 
@@ -84,14 +85,15 @@ int OnInit()
 
                Dev.LINE_Init = __LINE__;
                Print(__FUNCTION__, "#", __LINE__);
+               Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", UninitializeReason(reason));
 
                Docker.Global.Zone_PPlaceMODE  =  Port.docker.Zone_PPlaceMODE;
-               
+
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Price_Master : ", Port.docker.Price_Master);
 
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_total_1 : ", Port.docker.Docker_total_1);
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Docker_total_2: ", Port.docker.Docker_total_2);
-               
+
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Zone_PPlaceMODE : ", Port.docker.Zone_PPlaceMODE);
                Print(__FUNCTION__, "#", __LINE__, " Port.docker.Point_Distance : ", Port.docker.Point_Distance);
 
@@ -137,6 +139,7 @@ int OnInit()
 
             Dev.LINE_Init = __LINE__;
             Print(__FUNCTION__, "#", __LINE__);
+            Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", UninitializeReason(reason));
 
             int   Reason   =  UninitializeReason();
             Print("Reason : ", Reason);
@@ -220,6 +223,9 @@ int OnInit()
       }
    }
    {
+      Print(__FUNCTION__, "#", __LINE__, " Dev.LINE_Init : ", Dev.LINE_Init);
+   }
+   {
       Print(__FUNCTION__, "#", __LINE__);
 
       Comments.add("#Version", EA_Version);
@@ -294,7 +300,7 @@ void OnTick()
 
 //---
    if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
-      //&&DEV_OneTick && !DEV_Clear
+//&&DEV_OneTick && !DEV_Clear
      ) {
 
       CMM_Dock_UP = "\n";
@@ -359,7 +365,7 @@ void OnTick()
    CMM += CMM_Dock_DW;
 
 //---
-   //Comment(CMM);
+//Comment(CMM);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -480,8 +486,8 @@ void OnTradeTransaction(const MqlTradeTransaction & trans,
                         const MqlTradeResult & result)
 {
 //---
-   //Print(__FUNCTION__"#", __LINE__);
-   //OnTick();
+//Print(__FUNCTION__"#", __LINE__);
+//OnTick();
 }
 //+------------------------------------------------------------------+
 //| Tester function                                                  |
@@ -606,5 +612,34 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 
 //---
    return   result.order;
+}
+//+------------------------------------------------------------------+
+string   UninitializeReason(int  reason)
+{
+   switch(reason) {
+   case  REASON_PROGRAM :
+      return   "	0	-	REASON_PROGRAM	-	Expert Advisor terminated its operation by calling the ExpertRemove() function	";
+   case  REASON_REMOVE :
+      return   "	1	-	REASON_REMOVE	-	Program has been deleted from the chart	";
+   case  REASON_RECOMPILE :
+      return   "	2	-	REASON_RECOMPILE	-	Program has been recompiled	";
+   case  REASON_CHARTCHANGE :
+      return   "	3	-	REASON_CHARTCHANGE	-	Symbol or chart period has been changed	";
+   case  REASON_CHARTCLOSE :
+      return   "	4	-	REASON_CHARTCLOSE	-	Chart has been closed	";
+   case  REASON_PARAMETERS :
+      return   "	5	-	REASON_PARAMETERS	-	Input parameters have been changed by a user	";
+   case  REASON_ACCOUNT :
+      return   "	6	-	REASON_ACCOUNT	-	Another account has been activated or reconnection to the trade server has occurred due to changes in the account settings	";
+   case  REASON_TEMPLATE :
+      return   "	7	-	REASON_TEMPLATE	-	A new template has been applied	";
+   case  REASON_INITFAILED :
+      return   "	8	-	REASON_INITFAILED	-	This value means that OnInit() handler has returned a nonzero value	";
+   case  REASON_CLOSE :
+      return   "	9	-	REASON_CLOSE	-	Terminal has been closed	";
+   default:
+      break;
+   }
+   return   "-";
 }
 //+------------------------------------------------------------------+

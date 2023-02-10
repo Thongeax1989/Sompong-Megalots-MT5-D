@@ -3,16 +3,43 @@
 //|                           Copyright 2023 Thongeak - Development. |
 //|                               https://www.facebook.com/lapukdee/ |
 //+------------------------------------------------------------------+
-#include "inc.mqh"
 
+#define     eaLOCK_Account ""
+/*
+   #Example.
+   "45843128,80000007"     => allow 2 acc.
+   ""                      => Account not locked
+   
+*/
+#define     eaLOCK_Date    ""
+/*
+   - Compared to the center time +0
+   #Example.
+   "31.12.2023"   => Day,Month,Year
+   ""             => Unlimited
+
+*/
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+#define EA_Version   "1.71"   //Megalots
+//---
 #property copyright "Copyright 2023 Thongeak - Development."
 #property link      "https://www.facebook.com/lapukdee/"
-#property version    EA_Version
+#property version    EA_Version;
+
+#property   description    "Account Allow : "+eaLOCK_Account
+#property   description    "Expire Date : "+eaLOCK_Date
 
 /**
 https://www.mql5.com/en/articles/81    MQL4  to MQL5
 **/
 
+#define     EA_Identity          "MLot"    //OrderName
+#define     EA_Identity_Short    "MLO"
+
+#include "inc.mqh"
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -282,11 +309,13 @@ void OnTick()
 
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
       Program.Running   =  false;
+      Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
    } else {
       //Print(__FUNCSIG__,"#",__LINE__,"__Module Frisrt * Else | !IsExpertEnabled() = ",!IsExpertEnabled()," | Program.Running = ",Program.Running);
    }
    {
       Port.Order_Callculator();
+      //Print(__FUNCTION__, "#", __LINE__);
 
       if(Port.All.CNT_Avtive == 0 &&
          Program.State_Ontick == eStateTick_CloseAll) {
@@ -300,19 +329,15 @@ void OnTick()
          ProduckLock.Checker();
 
          Program.Running   =  ProduckLock.Passport(false);
+         Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
 
          if(ProduckLock.EA_Allow == false) {
             OrderDeleteAll(__LINE__);
          }
       }
 
-      //GUI();
-
-   }
-//---
-   {
-      double   Temp = "Temp";
-      Program.Running = true;
+      GUI();
+      //Print(__FUNCTION__, "#", __LINE__);
    }
 //---
    bool  OnClose  = false;
@@ -366,7 +391,7 @@ void OnTick()
       }
 
       {/*** v1.64+ ***/
-         if(Port.All.Sum_ActiveHold < 0) {
+         if(Port.All.CNT_Avtive > 0 && Port.All.Sum_ActiveHold < 0) {
             //---
             if(exStopLoss_EQ_IO) {
                double   Act_EQ = AccountInfoDouble(ACCOUNT_EQUITY);
@@ -379,6 +404,7 @@ void OnTick()
                   OrderDeleteAll(__LINE__);     //My Order
 
                   Program.Running   =  false;
+                  Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
 
                   OnClose           = true;
 
@@ -393,11 +419,12 @@ void OnTick()
                   if(Port.docker.ActivePoint_TOP <= esStopLoss_Distance_Point ||
                      Port.docker.ActivePoint_BOT <= esStopLoss_Distance_Point) {
 
-                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",Port.docker.ActivePoint_TOP,",",Port.docker.ActivePoint_BOT,"]");
+                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",DoubleToString(Port.docker.ActivePoint_TOP,0),"TopPoint,",DoubleToString(Port.docker.ActivePoint_BOT,0),"TopPoint]");
                      OrderCloseAll(-1);
                      OrderDeleteAll(__LINE__);     //My Order
 
                      Program.Running   =  false;
+                     Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
 
                      OnClose           = true;
 
@@ -433,90 +460,65 @@ void OnTick()
 //+------------------------------------------------------------------+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+//+------------------------------------------------------------------+
 
+   if(ProduckLock.Passport() &&
+      !OnClose &&                                     // Not while CloseAll Process
+      Program.State_Ontick   == eStateTick_Normal) {   // Checkup CloseAll Process is done
+      //Print(__FUNCTION__, "#", __LINE__);
 
-//---
-   Port.Order_Callculator();
+      //Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+      if(Program.Running) {
 
-   {
-      Comments.add("#Version", EA_Version);
-      Comments.add("ACCOUNT_TRADE_EXPERT", string(bool(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))));
+         CMM_Dock_UP = "\n";
+         CMM_Dock_DW = "\n";
 
-      Comments.add("Program.Running ", Program.Running );
-      Comments.newline();
+         //if(!IsExpertEnabled()) {
+         //   Program.Running   =  false;
+         //}
 
-      Comments.add("Port.ActivePlace_TOP", DoubleToString(Port.docker.ActivePlace_TOP, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_TOP,0));
-      Comments.add("Port.ActivePlace_BOT", DoubleToString(Port.docker.ActivePlace_BOT, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_BOT,0));
-      Comments.newline();
+         int retCode = -1;
+         for(int i = 0; i < Docker.Global.Docker_total; i++) {
+            //---
+            if(false) {
+               CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) +  "\n";
+               CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) +  "\n";
 
-      Comments.add("Docker_total", Docker.Global.Docker_total, 0);
-      Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
-      Comments.newline();
+               CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) +  "\n";
+               CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) +  "\n";
 
-      Comments.add("Buy",string(Port.Buy.CNT_Avtive) + " / " + string(Port.Buy.CNT_Pending) + " = " + DoubleToString(Port.Buy.Sum_ActiveHold,4));
-      Comments.add("Sell",string(Port.Sell.CNT_Avtive) + " / " + string(Port.Sell.CNT_Pending) + " = " + DoubleToString(Port.Sell.Sum_ActiveHold,4));
-      Comments.add("All",string(Port.All.CNT_Avtive) + " / " + string(Port.All.CNT_Pending) + " = " + DoubleToString(Port.All.Sum_ActiveHold,4));
-      Comments.newline();
+            }
+            //---
 
-      Comments.Show();
-   }
-
-
-//---
-   if(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
-//&&DEV_OneTick && !DEV_Clear
-     ) {
-
-      CMM_Dock_UP = "\n";
-      CMM_Dock_DW = "\n";
-
-      //if(!IsExpertEnabled()) {
-      //   Program.Running   =  false;
-      //}
-
-      int retCode = -1;
-      for(int i = 0; i < Docker.Global.Docker_total; i++) {
-         //---
-         if(false) {
-            CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) +  "\n";
-            CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) +  "\n";
-
-            CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) +  "\n";
-            CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) +  "\n";
-
-         }
-         //---
-
-         if(Order_Select(Docker.Docker[i].TICKE_TOP_DW, Docker.Docker[i].Price_TOP_DW, retCode, __LINE__)) {
-
-         } else {
-            Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-         }
-         //---
-         if(i != Docker.Global.Docker_total - 1) {
-            if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__)) {
+            if(Order_Select(Docker.Docker[i].TICKE_TOP_DW, Docker.Docker[i].Price_TOP_DW, retCode, __LINE__)) {
 
             } else {
-               Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
             }
-         }
-         //------ Mid
-         if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__)) {
+            //---
+            if(i != Docker.Global.Docker_total - 1) {
+               if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__)) {
 
-         } else {
-            Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-         }
-         //---
-         if(i != Docker.Global.Docker_total - 1) {
-            if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__)) {
+               } else {
+                  Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               }
+            }
+            //------ Mid
+            if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__)) {
 
             } else {
-               Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+            }
+            //---
+            if(i != Docker.Global.Docker_total - 1) {
+               if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__)) {
+
+               } else {
+                  Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               }
             }
          }
+         //DEV_OneTick  = false;
       }
-      //DEV_OneTick  = false;
    }
-
 //CMM += CMM_Dock_UP;
 //CMM += "Mid \n";
 //CMM += CMM_Dock_DW;
@@ -690,7 +692,90 @@ void OnChartEvent(const int id,
                   const double & dparam,
                   const string & sparam)
 {
-//---
+//--- Check the event by pressing a mouse button
+   if(id == CHARTEVENT_OBJECT_CLICK) {
+
+      ChartRedraw();
+
+      string result[];
+      if(ObjectGetInteger(0,sparam,OBJPROP_TYPE) == OBJ_BUTTON)
+         if(StringSplit(sparam, StringGetCharacter("|", 0), result) == 3) {
+            if(result[0] == EA_Identity_ShortGUI) {
+               Print(__FUNCTION__, " sparam* : ", sparam);
+
+               if(result[1] == "PAUSE") {
+                  if(!Program.Running && !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
+                     int  MessageBox_ = MessageBox("Expert Disable !! : Running can't Setting", EA_Identity + " :: Program Status", MB_ICONWARNING | MB_OK);
+                  } else {
+
+                     string   str =  "Do you want to [[ Running ]] the program (Full auto Pendding and TakeProfit)";
+                     if(Program.Running)
+                        str = "Do you want to [[ PAUSE ]] the program (stop Place Pending)";
+
+                     int  MessageBox_ = MessageBox(str, EA_Identity + " :: Program Status", MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2);
+                     Print(__FUNCTION__, " MessageBox_* (IDYES=6): ", MessageBox_);
+
+                     if(MessageBox_ == IDYES) {
+                        Program.Running =  !Program.Running;
+                     }
+                     Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
+
+                  }
+               }
+
+               if(result[1] == "Close") {
+                  if(Port.All.CNT_Avtive > 0) {
+                     ENUM_POSITION_TYPE   Type  =  ENUM_POSITION_TYPE(result[2]);
+                     string   Type_str =  "All";
+                     if(Type == POSITION_TYPE_BUY)
+                        Type_str = "BUY";
+                     if(Type == POSITION_TYPE_SELL)
+                        Type_str = "SELL";
+
+                     int  MessageBox_ = MessageBox("Do you want to Close Order [[ " + Type_str + " ]]", EA_Identity + " :: Order Close", MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2);
+                     Print(__FUNCTION__, " MessageBox_* : ", MessageBox_);
+
+                     if(MessageBox_ == IDYES) {
+                        Program.Running = false;
+                        Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
+
+                        OrderCloseAll(Type);
+                     }
+                  } else {
+                     ChartRedraw();
+                  }
+               }
+
+               if(result[1] == "Clear") {
+
+                  int   Type  =  int(result[2]);
+                  string   Type_str =  "[[  All in Port  ]]";
+                  if(Type == 1)
+                     Type_str = "[[  In The " + EA_Identity + "  ]]";
+
+                  int  MessageBox_ = MessageBox("Do you want to Claer Pending... \n" + Type_str, EA_Identity + " :: Pending Clear", MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2);
+                  Print(__FUNCTION__, " MessageBox_* : ", MessageBox_);
+
+                  if(MessageBox_ == IDYES) {
+
+                     Program.Running = false;
+                     Print(__FUNCTION__, "#", __LINE__, " Program.Running : ", Program.Running);
+
+                     if(Type == 1) {
+                        Print(__LINE__);
+                        OrderDeleteAll(__LINE__);     //My Order
+                     }
+                     if(Type == 2) {
+                        Print(__LINE__);
+                        OrderDeleteAll(__LINE__);     //My Order
+                        //Print(__LINE__);
+                        //Order_PendingDelete(-2);   //Etc all imp
+                     }
+                  }
+               }
+            }
+         }
+   }
 
 }
 //+------------------------------------------------------------------+
@@ -799,13 +884,4 @@ string   UninitializeReason(int  reason)
    }
    return   "-";
 }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void  GUI()
-{
-}
-
-//+------------------------------------------------------------------+
-
 //+------------------------------------------------------------------+

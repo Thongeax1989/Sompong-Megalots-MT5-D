@@ -3,10 +3,7 @@
 //|                           Copyright 2023 Thongeak - Development. |
 //|                               https://www.facebook.com/lapukdee/ |
 //+------------------------------------------------------------------+
-#define EA_Version   "1.00"
 
-#define     EA_Identity          "MLot"    //OrderName
-#define     EA_Identity_Short    "MLO"
 //---
 enum ENUM_ProfitTake {
    ENUM_ProfitTakeBuySell,    //+ Buy,Sell
@@ -27,7 +24,7 @@ enum ENUM_OrderCommentPos {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-input   string               exEAname          = "v" + string(EA_Version);          //# Megalots
+input   string               exEAname          = "v" + string(EA_Version) + "-MT5";        //# Megalots
 input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
 input   int                  exMagicnumber     =  10022023;         //• Magicnumber
 input   string               exOrder_1         =  ""; //-
@@ -68,7 +65,11 @@ input   double               exComm_Lot       = 9;   //• Commission/Lot [ Stan
 
 input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
 input   bool                 exPlaysound_OnClose  = true;   //• OnClose
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+#include "inc_Docker.mqh"
+#include "GUI.mqh"
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -217,11 +218,13 @@ public:
                   if(__POSITION_TYPE == POSITION_TYPE_BUY) {
 
                      Buy.CNT_Avtive++;
+                     Buy.Sum_Lot       += __POSITION_VOLUME;
                      Buy.Sum_ActiveHold += __POSITION_PROFIT;
                   }
                   if(__POSITION_TYPE == POSITION_TYPE_SELL) {
 
                      Sell.CNT_Avtive++;
+                     Sell.Sum_Lot       += __POSITION_VOLUME;
                      Sell.Sum_ActiveHold += __POSITION_PROFIT;
                   }
                   All.CNT_Avtive    =  Buy.CNT_Avtive + Sell.CNT_Avtive;
@@ -403,7 +406,7 @@ private:
 
 CPort Port  =  new CPort;
 //+------------------------------------------------------------------+
-#include "inc_Docker.mqh"
+
 
 
 
@@ -417,18 +420,15 @@ class CProductLock
 public:
    bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
    int               EA_Point,EA_AllowPoint;
-   CProductLock(void) {};
-   ~CProductLock(void) {};
 
-   bool              Checker()
+   void              CProductLock()
    {
-      /* Bypass */
-      double   Bypass   =  "Bypass";
-      ProduckLock.EA_Allow = true;
-      /* Bypass */
+      EA_AllowPoint = 4;
+      //Print(__FUNCTION__,"#",__LINE__);
+      Checker();
+   };
 
-      return   true;
-   }
+   ~CProductLock(void) {};
 
    bool              Passport(bool  action = true)
    {
@@ -436,12 +436,11 @@ public:
 
          {/* hotfix/CutloseByEQ [v1.644] */
 
-//            if(IsOptimization() || IsTesting())
-//               return   true;
-//
-//            if(action)
-//               return   true;
+            if(MQLInfoInteger(MQL_OPTIMIZATION) ||  MQLInfoInteger(MQL_TESTER))
+               return   true;
 
+            if(action)
+               return   true;
          }
 
       } else {
@@ -455,18 +454,91 @@ public:
    }
    bool              PassportIsTemp()
    {
-      return   true;
-      //---
-
       if(EA_Point == EA_AllowPoint) {
          return   true;
       }
       return   false;
    }
+   bool              Checker()
+   {
+      EA_AllowAccount = IsEA_AllowAccount();
+      Print(__FUNCTION__,"#",__LINE__," EA_AllowAccount : ",EA_AllowAccount);
+      //---
+      EA_AllowDate   = IsEA_AllowDate();
+      Print(__FUNCTION__,"#",__LINE__," EA_AllowDate : ",EA_AllowDate);
+      //---
+      EA_OrderRem = Port.All.CNT_Avtive > 0;
+      Print(__FUNCTION__,"#",__LINE__," EA_OrderRem : ",EA_OrderRem);
+      CheckerPoint();
+
+      Print("");
+      EA_Allow =  EA_AllowAccount && (EA_AllowDate || EA_OrderRem);
+      Print(__FUNCTION__,"#",__LINE__," ** EA_Allow ** : ",EA_Allow);
+      Print("");
+
+      return   EA_Allow;
+   }
+private:
+   int               CheckerPoint()
+   {
+      EA_Point = 0;
+
+      if(EA_AllowAccount)
+         EA_Point += 3;
+      if(EA_AllowDate)
+         EA_Point += 2;
+      if(EA_OrderRem)
+         EA_Point += 1;
+
+      Print(__FUNCTION__,"#",__LINE__," EA_Point : ",EA_Point,"/",EA_AllowPoint," = ",EA_Point >= EA_AllowPoint);
+      return   EA_Point;
+   }
+   bool              IsEA_AllowAccount()
+   {
+
+      string   numm  = string(AccountInfoInteger(ACCOUNT_LOGIN));
+      Print("");
+
+      int   k  =  StringSplit(eaLOCK_Account,StringGetCharacter(",",0),Account);
+      if(k > 0) {
+
+         Print(__FUNCTION__,"#",__LINE__," Account Allow : ",eaLOCK_Account);
+         Print(__FUNCTION__,"#",__LINE__," AccountNumber : ",numm);
+
+         for(int i = 0; i < k; i++) {
+            if(Account[i] == numm) {
+               return   true;
+            }
+         }
+
+      } else {
+         //--- k=0 :: Account free
+         Print(__FUNCTION__,"#",__LINE__," Account Allow : Unlimited");
+         return   true;
+      }
+      return   false;
+   }
+
+   bool              IsEA_AllowDate()
+   {
+      Print("");
+      if(eaLOCK_Date == "") {
+         Print(__FUNCTION__,"#",__LINE__," Exprie : Unlimited");
+         return   true;
+      }
+      datetime exprie   =  StringToTime(eaLOCK_Date);
+      //TimeGMT();
+      Print(__FUNCTION__,"#",__LINE__," Exprie : ",exprie);
+      Print(__FUNCTION__,"#",__LINE__," TimeGMT : ",TimeGMT());
+
+      EA_AllowDate   =  TimeGMT() < exprie;
+      return   EA_AllowDate;
+   }
 };
 //+------------------------------------------------------------------+
-CProductLock   ProduckLock();
+//|                                                                  |
 //+------------------------------------------------------------------+
+CProductLock   ProduckLock();
 
 
 
@@ -479,7 +551,7 @@ struct sProgram {
 
    sProgram()
    {
-      Running        =  false;
+      Running       =  false;
       ProduckLock    =  false;
 
       State_Ontick   =  false;

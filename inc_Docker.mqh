@@ -37,7 +37,7 @@ public:
       double            Price_Min;
 
       ENUM_PlacePending Zone_PPlaceMODE;
-      sGlobal()
+                     sGlobal()
       {
          Docker_total   =  -1;
          Price_Master   =  -1;
@@ -55,21 +55,21 @@ public:
    //--- End : Struct Define
 
 
-   CDocker(void)
+                     CDocker(void)
    {
       Print(__FUNCTION__"#", __LINE__);
 
       //Main();
 
    };
-   ~CDocker(void)
+                    ~CDocker(void)
    {
    };
    void              Main()
    {
 
       Print(__FUNCTION__"#", __LINE__);
-      
+
       double   DEV_Price_Master_Carry = 0 * _Point;
       Global.Price_Master = (exZone_PriceStart == 0) ?
                             SymbolInfoDouble(Symbol(),SYMBOL_BID) - DEV_Price_Master_Carry :
@@ -204,11 +204,11 @@ public:
    {
       bool  ShowGuide  = true;
 //---
-      color  clrMaster = clrDeepPink, clrBuy =  clrRoyalBlue, clrSell =  clrTomato;
+      color  clrMaster = exColor_clrMaster, clrBuy =  exColor_clrBuy, clrSell =  exColor_clrSell;
 //---
       HLineCreate("Docker[0].Master", Global.Price_Master, clrMaster);
 
-      bool  IsShowPrice =  true;
+      bool  IsShowPrice =  false;
       IsShowPrice = !IsShowPrice;
 //---
       for(int i = 0; i < Global.Docker_total; i++) {

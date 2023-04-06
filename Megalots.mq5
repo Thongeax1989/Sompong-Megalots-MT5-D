@@ -23,7 +23,7 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-#define EA_Version   "1.71"   //Megalots
+#define EA_Version   "v1.71mt5D1.00"   //Megalots
 //---
 #property copyright "Copyright 2023 Thongeak - Development."
 #property link      "https://www.facebook.com/lapukdee/"

@@ -347,7 +347,9 @@ void OnTick()
 
       if(exProfit_MODE == ENUM_ProfitTakeTypeD) {
 
-         if((Port.All.CNT_Avtive / 2) >= 1 &&
+         if(
+            (Port.All.Sum_ActiveHold >= 0 ) &&
+            (Port.Buy.CNT_Avtive) >= 2 &&
             (Port.Buy.Sum_Lot == Port.Sell.Sum_Lot)) {
             Print("");
             Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
@@ -498,8 +500,11 @@ void OnTick()
       if(Program.Running) {
 
          {/*** Type D :: PriceStart_Auto ***/
-            if(OnClose && exZone_PriceStart_Auto) {
+            if(exZone_PriceStart_Auto) {
+               //Print(__FUNCTION__, __LINE__, " OnClose : ", OnClose, " | exZone_PriceStart_Auto : ", exZone_PriceStart_Auto);
+
                if(Port.All.CNT_Avtive == 0) {
+                  Print(__FUNCTION__, __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
 
                   DockerDefine();
 

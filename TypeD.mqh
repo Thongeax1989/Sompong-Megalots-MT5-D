@@ -3,6 +3,8 @@
 //+------------------------------------------------------------------+
 void  DockerDefine()
 {
+   Print(__FUNCTION__);
+   
    Dev.LINE_Init = __LINE__;
 
    double   DEV_Price_Master_Carry = 0 * _Point;
@@ -14,7 +16,7 @@ void  DockerDefine()
 
    Docker.Global.Point_Distance = exZone_Distance;
    Docker.Global.Price_Distance = exZone_Distance * _Point;
-   //---
+//---
 
    Docker.Global.Docker_total   =  ArrayResize(Docker.Docker, Docker.Global.Docker_total);
    Print(__FUNCTION__, " Docker_total : ", Docker.Global.Docker_total);

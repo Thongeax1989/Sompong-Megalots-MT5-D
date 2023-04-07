@@ -8,7 +8,8 @@
 enum ENUM_ProfitTake {
    ENUM_ProfitTakeBuySell,    //+ Buy,Sell
    ENUM_ProfitTakeAll,        //+ Original(Holding.Nav)
-   ENUM_ProfitTakeAllInc      //+ Profit + Lot Inc.Lot
+   ENUM_ProfitTakeAllInc,     //+ Profit + Lot Inc.Lot
+   ENUM_ProfitTakeTypeD,      //+ Type D
 };
 enum ENUM_PlacePending {   //*v1.6+
    E_PlaceNormal,    //+ Normal
@@ -24,13 +25,14 @@ enum ENUM_OrderCommentPos {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-input   string               exEAname          = "v" + string(EA_Version) + "-MT5";        //# Megalots
-input   string               exOrder           = " --------------- Setting --------------- ";   // --------------------------------------------------
-input   int                  exMagicnumber     =  10022023;         //• Magicnumber
-input   string               exOrder_1         =  ""; //-
-input   double               exZone_PriceStart =  0;                //• Price Start (0 = Current of Bid Price)
-input   int                  exZone_Distance   =  50;               //• Distance
-input   ENUM_PlacePending    exZone_PPlaceMODE =  E_PlaceHalfFrist; //• Pending Mode Place
+input   string               exEAname                 = "v" + string(EA_Version);        //# Megalots
+input   string               exOrder                  = " --------------- Setting --------------- ";   // --------------------------------------------------
+input   int                  exMagicnumber            =  10022023;         //• Magicnumber
+input   string               exOrder_1                =  ""; //-
+input   double               exZone_PriceStart        =  0;                //• Price Start (0 = Current of Bid Price)
+input   int                  exZone_Distance          =  50;               //• Distance
+input   ENUM_PlacePending    exZone_PPlaceMODE        =  E_PlaceHalfFrist; //• Pending Mode Place
+input   bool                 exZone_PriceStart_Auto   =  false;      //• ** PriceStart Auto by BID (When Close All)
 
 input   string               exOrder1          = " --------------- Order : Group 1 --------------- ";   // --------------------------------------------------
 input   int                  exZone_CNT        =  2;                //• N Order
@@ -74,6 +76,7 @@ input   bool                 exPlaysound_OnClose  = true;   //• OnClose
 //|                                                                  |
 //+------------------------------------------------------------------+
 #include "inc_Docker.mqh"
+#include "TypeD.mqh"
 #include "GUI.mqh"
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -102,12 +105,12 @@ public:
 
       double               CommHarvest, Profit_Inc;
       //--- Constructor
-      SOrder()
+                     SOrder()
       {
          Clear();
       }
       //--- Destructor
-      ~SOrder()
+                    ~SOrder()
       {
          Print(__FUNCTION__"#", __LINE__);
       }
@@ -138,10 +141,10 @@ public:
 
       int                  Docker_total_1, Docker_total_2;
       //---
-      double               ActivePlace_TOP,ActivePlace_BOT;
-      double               ActivePoint_TOP,ActivePoint_BOT;
+      double               ActivePlace_TOP, ActivePlace_BOT;
+      double               ActivePoint_TOP, ActivePoint_BOT;
 
-      SDocker()
+                     SDocker()
       {
          Clear();
       }
@@ -173,13 +176,13 @@ public:
    };
    SDocker           docker;
 
-   CPort()
+                     CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
 
       Order_Callculator();
    };
-   ~CPort()
+                    ~CPort()
    {
       Print(__FUNCTION__"#", __LINE__);
    };
@@ -243,8 +246,8 @@ public:
                   All.Profit_Inc  =  All.Sum_ActiveHold + All.CommHarvest;
                   //---
                   {
-                     docker.ActivePlace_TOP   =  MathMax(docker.ActivePlace_TOP,__POSITION_PRICE_OPEN);
-                     docker.ActivePlace_BOT   =  MathMin(docker.ActivePlace_BOT,__POSITION_PRICE_OPEN);
+                     docker.ActivePlace_TOP   =  MathMax(docker.ActivePlace_TOP, __POSITION_PRICE_OPEN);
+                     docker.ActivePlace_BOT   =  MathMin(docker.ActivePlace_BOT, __POSITION_PRICE_OPEN);
                   }
                   //---
 
@@ -265,18 +268,18 @@ public:
          //Global.Price_Master
          if(All.CNT_Avtive > 0) {
 
-            double   Bid  =  SymbolInfoDouble(NULL,SYMBOL_BID);
-            double   Ask  =  SymbolInfoDouble(NULL,SYMBOL_ASK);
+            double   Bid  =  SymbolInfoDouble(NULL, SYMBOL_BID);
+            double   Ask  =  SymbolInfoDouble(NULL, SYMBOL_ASK);
 
             docker.ActivePoint_TOP = ( docker.ActivePlace_TOP - Ask) / _Point;
             docker.ActivePoint_BOT = (Bid -  docker.ActivePlace_BOT) / _Point;
 
-            Draw_SumProduct(5,  docker.ActivePlace_TOP, clrYellow,"_ActivePlace_TOP");
-            Draw_SumProduct(5,  docker.ActivePlace_BOT, clrYellow,"_ActivePlace_BOT");
+            Draw_SumProduct(5,  docker.ActivePlace_TOP, clrYellow, "_ActivePlace_TOP");
+            Draw_SumProduct(5,  docker.ActivePlace_BOT, clrYellow, "_ActivePlace_BOT");
 
          } else {
-            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_TOP");
-            Draw_SumProduct(5, 0, clrYellow,"_ActivePlace_BOT");
+            Draw_SumProduct(5, 0, clrYellow, "_ActivePlace_TOP");
+            Draw_SumProduct(5, 0, clrYellow, "_ActivePlace_BOT");
          }
       }
 
@@ -357,7 +360,7 @@ private:
       string result[];
       int k = StringSplit(OrderComment__, StringGetCharacter("|", 0), result);
 
-      Print(__FUNCTION__"#", __LINE__, " OrderComment__ : ", OrderComment__," | k:",k);
+      Print(__FUNCTION__"#", __LINE__, " OrderComment__ : ", OrderComment__, " | k:", k);
       if(k == 5) {
 
          docker.Price_Master      =  StringToDouble(result[Pos_MasterPrice]);
@@ -390,14 +393,14 @@ private:
       return   false;
    }
 
-   void              Draw_SumProduct(int OP, double Price, color Clr,string   name = "_SumProduct",bool  IsAdd_IdName = true)
+   void              Draw_SumProduct(int OP, double Price, color Clr, string   name = "_SumProduct", bool  IsAdd_IdName = true)
    {
       string ObjTag = (IsAdd_IdName) ?
                       EA_Identity_Short + name + string(OP) :
                       name + string(OP);
       //if(!ObjectCreate(chart_ID, name, OBJ_HLINE, sub_window, 0, price)) {
 
-      if(!ObjectCreate(0,ObjTag, OBJ_HLINE, 0, 0, Price)) {
+      if(!ObjectCreate(0, ObjTag, OBJ_HLINE, 0, 0, Price)) {
 
       }
       if(ObjectMove(0, ObjTag, 0, 0, Price)) {
@@ -423,8 +426,8 @@ class CProductLock
    string            Account[];
    bool              EA_OrderRem;
 public:
-   bool              EA_Allow,EA_AllowAccount,EA_AllowDate;
-   int               EA_Point,EA_AllowPoint;
+   bool              EA_Allow, EA_AllowAccount, EA_AllowDate;
+   int               EA_Point, EA_AllowPoint;
 
    void              CProductLock()
    {
@@ -433,7 +436,7 @@ public:
       Checker();
    };
 
-   ~CProductLock(void) {};
+                    ~CProductLock(void) {};
 
    bool              Passport(bool  action = true)
    {
@@ -467,18 +470,18 @@ public:
    bool              Checker()
    {
       EA_AllowAccount = IsEA_AllowAccount();
-      Print(__FUNCTION__,"#",__LINE__," EA_AllowAccount : ",EA_AllowAccount);
+      Print(__FUNCTION__, "#", __LINE__, " EA_AllowAccount : ", EA_AllowAccount);
       //---
       EA_AllowDate   = IsEA_AllowDate();
-      Print(__FUNCTION__,"#",__LINE__," EA_AllowDate : ",EA_AllowDate);
+      Print(__FUNCTION__, "#", __LINE__, " EA_AllowDate : ", EA_AllowDate);
       //---
       EA_OrderRem = Port.All.CNT_Avtive > 0;
-      Print(__FUNCTION__,"#",__LINE__," EA_OrderRem : ",EA_OrderRem);
+      Print(__FUNCTION__, "#", __LINE__, " EA_OrderRem : ", EA_OrderRem);
       CheckerPoint();
 
       Print("");
       EA_Allow =  EA_AllowAccount && (EA_AllowDate || EA_OrderRem);
-      Print(__FUNCTION__,"#",__LINE__," ** EA_Allow ** : ",EA_Allow);
+      Print(__FUNCTION__, "#", __LINE__, " ** EA_Allow ** : ", EA_Allow);
       Print("");
 
       return   EA_Allow;
@@ -495,7 +498,7 @@ private:
       if(EA_OrderRem)
          EA_Point += 1;
 
-      Print(__FUNCTION__,"#",__LINE__," EA_Point : ",EA_Point,"/",EA_AllowPoint," = ",EA_Point >= EA_AllowPoint);
+      Print(__FUNCTION__, "#", __LINE__, " EA_Point : ", EA_Point, "/", EA_AllowPoint, " = ", EA_Point >= EA_AllowPoint);
       return   EA_Point;
    }
    bool              IsEA_AllowAccount()
@@ -504,11 +507,11 @@ private:
       string   numm  = string(AccountInfoInteger(ACCOUNT_LOGIN));
       Print("");
 
-      int   k  =  StringSplit(eaLOCK_Account,StringGetCharacter(",",0),Account);
+      int   k  =  StringSplit(eaLOCK_Account, StringGetCharacter(",", 0), Account);
       if(k > 0) {
 
-         Print(__FUNCTION__,"#",__LINE__," Account Allow : ",eaLOCK_Account);
-         Print(__FUNCTION__,"#",__LINE__," AccountNumber : ",numm);
+         Print(__FUNCTION__, "#", __LINE__, " Account Allow : ", eaLOCK_Account);
+         Print(__FUNCTION__, "#", __LINE__, " AccountNumber : ", numm);
 
          for(int i = 0; i < k; i++) {
             if(Account[i] == numm) {
@@ -518,7 +521,7 @@ private:
 
       } else {
          //--- k=0 :: Account free
-         Print(__FUNCTION__,"#",__LINE__," Account Allow : Unlimited");
+         Print(__FUNCTION__, "#", __LINE__, " Account Allow : Unlimited");
          return   true;
       }
       return   false;
@@ -528,13 +531,13 @@ private:
    {
       Print("");
       if(eaLOCK_Date == "") {
-         Print(__FUNCTION__,"#",__LINE__," Exprie : Unlimited");
+         Print(__FUNCTION__, "#", __LINE__, " Exprie : Unlimited");
          return   true;
       }
       datetime exprie   =  StringToTime(eaLOCK_Date);
       //TimeGMT();
-      Print(__FUNCTION__,"#",__LINE__," Exprie : ",exprie);
-      Print(__FUNCTION__,"#",__LINE__," TimeGMT : ",TimeGMT());
+      Print(__FUNCTION__, "#", __LINE__, " Exprie : ", exprie);
+      Print(__FUNCTION__, "#", __LINE__, " TimeGMT : ", TimeGMT());
 
       EA_AllowDate   =  TimeGMT() < exprie;
       return   EA_AllowDate;
@@ -554,7 +557,7 @@ struct sProgram {
 
    int               State_Ontick;
 
-   sProgram()
+                     sProgram()
    {
       Running       =  false;
       ProduckLock    =  false;
@@ -619,23 +622,23 @@ bool  OrderClose(ulong  position_ticket)
       //--- set the price and order type depending on the position type
 
       if(type == POSITION_TYPE_BUY) {
-         request.price = SymbolInfoDouble(request.symbol,SYMBOL_BID);
+         request.price = SymbolInfoDouble(request.symbol, SYMBOL_BID);
          request.type = ORDER_TYPE_SELL;
       }
       if(type == POSITION_TYPE_SELL) {
-         request.price = SymbolInfoDouble(request.symbol,SYMBOL_ASK);
+         request.price = SymbolInfoDouble(request.symbol, SYMBOL_ASK);
          request.type = ORDER_TYPE_BUY;
       }
 
       //--- output information about the closure
-      PrintFormat("Close #%I64d %s %s",position_ticket,request.symbol,EnumToString(type));
+      PrintFormat("Close #%I64d %s %s", position_ticket, request.symbol, EnumToString(type));
       //--- send the request
-      if(!OrderSend(request,result)) {
-         Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());                 // if unable to send the request, output the error code
+      if(!OrderSend(request, result)) {
+         Print(__FUNCTION__, "#", __LINE__, " OrderSend error ", GetLastError());                // if unable to send the request, output the error code
          return   false;
       }
       //--- information about the operation
-      Print(__FUNCTION__, "#", __LINE__, " retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
+      Print(__FUNCTION__, "#", __LINE__, " retcode=", result.retcode, "  deal=", result.deal, "  order=", result.order);
       //---
    }
    return   true;
@@ -790,12 +793,12 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
    request.action = TRADE_ACTION_REMOVE;                 // type of trade operation
    request.order = OrderDelete_Ticket;                         // order ticket
 //--- send the request
-   if(!OrderSend(request,result)) {
-      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());    // if unable to send the request, output the error code
+   if(!OrderSend(request, result)) {
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ", GetLastError());   // if unable to send the request, output the error code
       return false;
    }
 //--- information about the operation
-   Print(__FUNCTION__, "#", __LINE__, " TRADE_ACTION_REMOVE@ retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
+   Print(__FUNCTION__, "#", __LINE__, " TRADE_ACTION_REMOVE@ retcode=", result.retcode, "  deal=", result.deal, "  order=", result.order);
    return true;
 }
 //+------------------------------------------------------------------+
@@ -804,7 +807,7 @@ bool OrderDelete(ulong  OrderDelete_Ticket)
 bool  OrderDeleteAll(int  CommandByLine)
 {
    if(CommandByLine != -1) {
-      Print(__FUNCTION__, "#", __LINE__, " CommandByLine ",CommandByLine);
+      Print(__FUNCTION__, "#", __LINE__, " CommandByLine ", CommandByLine);
    }
    /* Funtion */
    int   CountOfBox = 0;
@@ -964,12 +967,12 @@ bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 class CComment
 {
 public:
-   CComment(void)
+                     CComment(void)
    {
       text_clear();
       Comment("");
    };
-   ~CComment(void) {};
+                    ~CComment(void) {};
 
    void              add(string  name, double value, int digit)
    {

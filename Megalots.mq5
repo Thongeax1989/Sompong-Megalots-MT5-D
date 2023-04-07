@@ -9,7 +9,7 @@
    #Example.
    "45843128,80000007"     => allow 2 acc.
    ""                      => Account not locked
-   
+
 */
 #define     eaLOCK_Date    ""
 /*
@@ -23,7 +23,7 @@
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-#define EA_Version   "v1.71mt5D1.00"   //Megalots
+#define EA_Version   "1.71mt5D1.00"   //Megalots
 //---
 #property copyright "Copyright 2023 Thongeak - Development."
 #property link      "https://www.facebook.com/lapukdee/"
@@ -58,7 +58,7 @@ int OnInit()
    Print(" ----------------------------------------------------------------------------------------- ");
 
    {
-      ChartSetInteger(0,CHART_SHOW_GRID,false);
+      ChartSetInteger(0, CHART_SHOW_GRID, false);
       //---
 
       Program.Running   =  false;
@@ -69,11 +69,11 @@ int OnInit()
       Print(__FUNCTION__, "#", __LINE__, " UninitializeReason()  : ", UninitializeReason(reason));
 
       {
-         esStopLoss_Distance_Point = NormalizeDouble(exStopLoss_Distance_Point * -1,_Digits);
+         esStopLoss_Distance_Point = NormalizeDouble(exStopLoss_Distance_Point * -1, _Digits);
       }
 
       Port.Order_Callculator();
-      Print(__FUNCTION__,"-->Port.Order_Callculator()", "#", __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
+      Print(__FUNCTION__, "-->Port.Order_Callculator()", "#", __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
 
       {
          ProduckLock.Checker();
@@ -180,7 +180,7 @@ int OnInit()
 
                   double   DEV_Price_Master_Carry = 0 * _Point;
                   Docker.Global.Price_Master = (exZone_PriceStart == 0) ?
-                                               SymbolInfoDouble(_Symbol,SYMBOL_BID) - DEV_Price_Master_Carry :
+                                               SymbolInfoDouble(_Symbol, SYMBOL_BID) - DEV_Price_Master_Carry :
                                                exZone_PriceStart;
 
                   Docker.Global.Docker_total   = Zone_getCNT(exZone_CNT, exZone_CNT_2, exZone_PPlaceMODE);
@@ -263,7 +263,7 @@ int OnInit()
       Comments.add("Docker_total", Docker.Global.Docker_total, 0);
       Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
 
-      Comments.add("cnt_All",Port.All.CNT_Avtive);
+      Comments.add("cnt_All", Port.All.CNT_Avtive);
       //Comments.newline();
 
       //Comments.add("sumHold_Buy",Port.sumHold_Buy,2);
@@ -309,7 +309,7 @@ void OnTick()
 
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)) {
       Program.Running   =  false;
-      Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+      Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
    } else {
       //Print(__FUNCSIG__,"#",__LINE__,"__Module Frisrt * Else | !IsExpertEnabled() = ",!IsExpertEnabled()," | Program.Running = ",Program.Running);
    }
@@ -329,7 +329,7 @@ void OnTick()
          ProduckLock.Checker();
 
          Program.Running   =  ProduckLock.Passport(false);
-         Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+         Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
 
          if(ProduckLock.EA_Allow == false) {
             OrderDeleteAll(__LINE__);
@@ -345,12 +345,40 @@ void OnTick()
       Port.All.CNT_Avtive > 0) {
       bool  IsCloseAll  =  false;
 
+      if(exProfit_MODE == ENUM_ProfitTakeTypeD) {
+
+         if((Port.All.CNT_Avtive / 2) >= 1 &&
+            (Port.Buy.Sum_Lot == Port.Sell.Sum_Lot)) {
+            Print("");
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+
+            {
+               OrderCloseAll(-1);
+               OnClose     = true;
+
+               IsCloseAll  = true;
+            }
+         }
+
+         if(Port.All.Sum_ActiveHold >= exProfit_TakeTraget) {
+
+            Print("");
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+            Print(__FUNCTION__, __LINE__, " Order_Close(-1) | ", Port.All.Sum_ActiveHold, ">=", exProfit_TakeTraget);
+
+            OrderCloseAll(-1);
+            OnClose     = true;
+
+            IsCloseAll  = true;
+         }
+      }
+
       if(exProfit_MODE == ENUM_ProfitTakeAll) {
          if(Port.All.Sum_ActiveHold >= exProfit_TakeTraget) {
 
             Print("");
-            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
-            Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Sum_ActiveHold,">=",exProfit_TakeTraget);
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+            Print(__FUNCTION__, __LINE__, " Order_Close(-1) | ", Port.All.Sum_ActiveHold, ">=", exProfit_TakeTraget);
 
             OrderCloseAll(-1);
             OnClose     = true;
@@ -361,8 +389,8 @@ void OnTick()
       if(exProfit_MODE == ENUM_ProfitTakeAllInc) {
          if(Port.All.Profit_Inc >= exProfit_TakeTraget) {
             Print("");
-            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeAllInc);
-            Print(__FUNCTION__,__LINE__," Order_Close(-1) | ",Port.All.Profit_Inc,">=",exProfit_TakeTraget);
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+            Print(__FUNCTION__, __LINE__, " Order_Close(-1) | ", Port.All.Profit_Inc, ">=", exProfit_TakeTraget);
 
             OrderCloseAll(-1);
             OnClose     = true;
@@ -375,22 +403,23 @@ void OnTick()
 
          if(Port.Buy.Sum_ActiveHold >= exProfit_TakeTraget_BUY_) {
             Print("");
-            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeBuySell);
-            Print(__FUNCTION__,__LINE__," Order_Close(POSITION_TYPE_BUY) | ",Port.Buy.Sum_ActiveHold,">=",exProfit_TakeTraget_BUY_);
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+            Print(__FUNCTION__, __LINE__, " Order_Close(POSITION_TYPE_BUY) | ", Port.Buy.Sum_ActiveHold, ">=", exProfit_TakeTraget_BUY_);
             OrderCloseAll(POSITION_TYPE_BUY);
             OnClose  = true;
          }
          if(Port.Sell.Sum_ActiveHold >= exProfit_TakeTraget_SELL) {
             Print("");
-            Print(__FUNCTION__,__LINE__," exProfit_MODE : ",ENUM_ProfitTakeBuySell);
-            Print(__FUNCTION__,__LINE__," Order_Close(POSITION_TYPE_SELL) | ",Port.Sell.Sum_ActiveHold,">=",exProfit_TakeTraget_SELL);
+            Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
+            Print(__FUNCTION__, __LINE__, " Order_Close(POSITION_TYPE_SELL) | ", Port.Sell.Sum_ActiveHold, ">=", exProfit_TakeTraget_SELL);
             OrderCloseAll(POSITION_TYPE_SELL);
             OnClose  = true;
          }
 
       }
 
-      {/*** v1.64+ ***/
+      {
+         /*** v1.64+ ***/ /*** StopLoss ***/
          if(Port.All.CNT_Avtive > 0 && Port.All.Sum_ActiveHold < 0) {
             //---
             if(exStopLoss_EQ_IO) {
@@ -399,12 +428,12 @@ void OnTick()
                if(Act_EQ <= exStopLoss_EQ_CutValue) {
 
                   //PlaySound("alert");
-                  Print(__LINE__,"#",__FUNCTION__," Stoploss-Equity | ",Act_EQ," : ",exStopLoss_EQ_CutValue);
+                  Print(__LINE__, "#", __FUNCTION__, " Stoploss-Equity | ", Act_EQ, " : ", exStopLoss_EQ_CutValue);
                   OrderCloseAll(-1);
                   OrderDeleteAll(__LINE__);     //My Order
 
                   Program.Running   =  false;
-                  Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+                  Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
 
                   OnClose           = true;
 
@@ -419,12 +448,12 @@ void OnTick()
                   if(Port.docker.ActivePoint_TOP <= esStopLoss_Distance_Point ||
                      Port.docker.ActivePoint_BOT <= esStopLoss_Distance_Point) {
 
-                     Print(__LINE__,"#",__FUNCTION__," Stoploss-Point | ",esStopLoss_Distance_Point,"P ","[",DoubleToString(Port.docker.ActivePoint_TOP,0),"TopPoint,",DoubleToString(Port.docker.ActivePoint_BOT,0),"TopPoint]");
+                     Print(__LINE__, "#", __FUNCTION__, " Stoploss-Point | ", esStopLoss_Distance_Point, "P ", "[", DoubleToString(Port.docker.ActivePoint_TOP, 0), "TopPoint,", DoubleToString(Port.docker.ActivePoint_BOT, 0), "TopPoint]");
                      OrderCloseAll(-1);
                      OrderDeleteAll(__LINE__);     //My Order
 
                      Program.Running   =  false;
-                     Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
+                     Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
 
                      OnClose           = true;
 
@@ -468,6 +497,17 @@ void OnTick()
       //Print(__LINE__,"#",__FUNCTION__," Program.Running : ",Program.Running);
       if(Program.Running) {
 
+         {/*** Type D :: PriceStart_Auto ***/
+            if(OnClose && exZone_PriceStart_Auto) {
+               if(Port.All.CNT_Avtive == 0) {
+
+                  DockerDefine();
+
+               }
+            }
+
+         }
+
          CMM_Dock_UP = "\n";
          CMM_Dock_DW = "\n";
 
@@ -479,11 +519,11 @@ void OnTick()
          for(int i = 0; i < Docker.Global.Docker_total; i++) {
             //---
             if(false) {
-               CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP,_Digits) +  "\n";
-               CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW,_Digits) +  "\n";
+               CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP, _Digits) +  "\n";
+               CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW, _Digits) +  "\n";
 
-               CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP,_Digits) +  "\n";
-               CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW,_Digits) +  "\n";
+               CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP, _Digits) +  "\n";
+               CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW, _Digits) +  "\n";
 
             }
             //---
@@ -597,7 +637,7 @@ bool  Order_Select(ulong  Ticket_Check, double  Price_Check, int   &retDevCode, 
                      double   __ORDER_PRICE_OPEN = OrderGetDouble(ORDER_PRICE_OPEN);
                      if(__ORDER_PRICE_OPEN != Price_Check) {
                         if(OrderDelete(_OrderGetTicket)) {
-                           Print(__FUNCTION__"#", __LINE__, " OrderDelete(",_OrderGetTicket,") : ", __ORDER_PRICE_OPEN, " != ", Price_Check," | get != Check");
+                           Print(__FUNCTION__"#", __LINE__, " OrderDelete(", _OrderGetTicket, ") : ", __ORDER_PRICE_OPEN, " != ", Price_Check, " | get != Check");
 
                            IsTicket_Found = false;
                         }
@@ -698,7 +738,7 @@ void OnChartEvent(const int id,
       ChartRedraw();
 
       string result[];
-      if(ObjectGetInteger(0,sparam,OBJPROP_TYPE) == OBJ_BUTTON)
+      if(ObjectGetInteger(0, sparam, OBJPROP_TYPE) == OBJ_BUTTON)
          if(StringSplit(sparam, StringGetCharacter("|", 0), result) == 3) {
             if(result[0] == EA_Identity_ShortGUI) {
                Print(__FUNCTION__, " sparam* : ", sparam);
@@ -808,7 +848,7 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
 //---
 //--- checking the type of operation
    double   lot   =  -1;
-   double __BID = SymbolInfoDouble(_Symbol,SYMBOL_BID);
+   double __BID = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
    if(OP_DIR == ORDER_TYPE_BUY) {
 
@@ -840,17 +880,17 @@ ulong Order_Place(int DockRoom, double   price, ENUM_ORDER_TYPE OP_DIR = -1)
    request.type     = OP_DIR;                                           // order type
    request.symbol   = Symbol();                                        // symbol
 
-   request.price    = NormalizeDouble(price,_Digits);                 // normalized opening price
+   request.price    = NormalizeDouble(price, _Digits);                // normalized opening price
    request.volume   = lot;
    request.deviation = 0;                                              // allowed deviation from the price
 
    request.comment   =  OrderTagsCMM;
 
 //--- send the request
-   if(!OrderSend(request,result))
-      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ",GetLastError());                 // if unable to send the request, output the error code
+   if(!OrderSend(request, result))
+      Print(__FUNCTION__, "#", __LINE__, " OrderSend error ", GetLastError());                // if unable to send the request, output the error code
 //--- information about the operation
-   Print(__FUNCTION__, "#", __LINE__, " retcode=",result.retcode,"  deal=",result.deal,"  order=",result.order);
+   Print(__FUNCTION__, "#", __LINE__, " retcode=", result.retcode, "  deal=", result.deal, "  order=", result.order);
 
 //---
    return   result.order;

@@ -24,7 +24,7 @@ void  DockerDefine()
    Print(__FUNCTION__, " Docker_total_2 : ", Docker.Global.Docker_total_2);
 
    {
-      ObjectsDeleteAll(0, 0, -1);
+      //ObjectsDeleteAll(0, 0, -1);
 
       //---Order_Close
       //__Order_Close(-1);

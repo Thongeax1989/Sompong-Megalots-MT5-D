@@ -347,7 +347,9 @@ void OnTick()
 
       if(exProfit_MODE == ENUM_ProfitTakeTypeD) {
 
-         if((Port.All.CNT_Avtive / 2) >= 1 &&
+         if(
+            (Port.All.Sum_ActiveHold >= 0 ) &&
+            (Port.Buy.CNT_Avtive) >= 1 &&
             (Port.Buy.Sum_Lot == Port.Sell.Sum_Lot)) {
             Print("");
             Print(__FUNCTION__, __LINE__, " exProfit_MODE : ", exProfit_MODE);
@@ -490,7 +492,6 @@ void OnTick()
 //+------------------------------------------------------------------+//+------------------------------------------------------------------+
 
    if(ProduckLock.Passport() &&
-      !OnClose &&                                     // Not while CloseAll Process
       Program.State_Ontick   == eStateTick_Normal) {   // Checkup CloseAll Process is done
       //Print(__FUNCTION__, "#", __LINE__);
 
@@ -499,11 +500,15 @@ void OnTick()
 
          {/*** Type D :: PriceStart_Auto ***/
             if(OnClose && exZone_PriceStart_Auto) {
+               //Print(__FUNCTION__, __LINE__, " OnClose : ", OnClose, " | exZone_PriceStart_Auto : ", exZone_PriceStart_Auto);
+
                if(Port.All.CNT_Avtive == 0) {
+                  Print(__FUNCTION__, __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
 
                   DockerDefine();
 
                }
+
             }
 
          }
@@ -514,49 +519,51 @@ void OnTick()
          //if(!IsExpertEnabled()) {
          //   Program.Running   =  false;
          //}
+         if(!OnClose/*** Not while CloseAll Process ***/ ) {
 
-         int retCode = -1;
-         for(int i = 0; i < Docker.Global.Docker_total; i++) {
-            //---
-            if(false) {
-               CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP, _Digits) +  "\n";
-               CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW, _Digits) +  "\n";
+            int retCode = -1;
+            for(int i = 0; i < Docker.Global.Docker_total; i++) {
+               //---
+               if(false) {
+                  CMM_Dock_UP += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_TOP_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_UP, _Digits) +  "\n";
+                  CMM_Dock_UP += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_TOP_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_TOP_DW, _Digits) +  "\n";
 
-               CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP, _Digits) +  "\n";
-               CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW, _Digits) +  "\n";
+                  CMM_Dock_DW += "D[" + string(i) + "].UP" + " : " +  string(Docker.Docker[i].TICKE_BOT_UP) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_UP, _Digits) +  "\n";
+                  CMM_Dock_DW += "D[" + string(i) + "].DW" + " : " +  string(Docker.Docker[i].TICKE_BOT_DW) + "@" +  DoubleToString(Docker.Docker[i].Price_BOT_DW, _Digits) +  "\n";
 
-            }
-            //---
+               }
+               //---
 
-            if(Order_Select(Docker.Docker[i].TICKE_TOP_DW, Docker.Docker[i].Price_TOP_DW, retCode, __LINE__)) {
-
-            } else {
-               Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-            }
-            //---
-            if(i != Docker.Global.Docker_total - 1) {
-               if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__)) {
+               if(Order_Select(Docker.Docker[i].TICKE_TOP_DW, Docker.Docker[i].Price_TOP_DW, retCode, __LINE__)) {
 
                } else {
-                  Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+                  Docker.Docker[i].TICKE_TOP_DW = Order_Place(i, Docker.Docker[i].Price_TOP_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
                }
-            }
-            //------ Mid
-            if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__)) {
+               //---
+               if(i != Docker.Global.Docker_total - 1) {
+                  if(Order_Select(Docker.Docker[i].TICKE_TOP_UP, Docker.Docker[i].Price_TOP_UP, retCode, __LINE__)) {
 
-            } else {
-               Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
-            }
-            //---
-            if(i != Docker.Global.Docker_total - 1) {
-               if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__)) {
+                  } else {
+                     Docker.Docker[i].TICKE_TOP_UP = Order_Place(i, Docker.Docker[i].Price_TOP_UP, ORDER_TYPE_BUY); //,Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+                  }
+               }
+               //------ Mid
+               if(Order_Select(Docker.Docker[i].TICKE_BOT_UP, Docker.Docker[i].Price_BOT_UP, retCode, __LINE__)) {
 
                } else {
-                  Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+                  Docker.Docker[i].TICKE_BOT_UP = Order_Place(i, Docker.Docker[i].Price_BOT_UP, ORDER_TYPE_BUY); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+               }
+               //---
+               if(i != Docker.Global.Docker_total - 1) {
+                  if(Order_Select(Docker.Docker[i].TICKE_BOT_DW, Docker.Docker[i].Price_BOT_DW, retCode, __LINE__)) {
+
+                  } else {
+                     Docker.Docker[i].TICKE_BOT_DW = Order_Place(i, Docker.Docker[i].Price_BOT_DW, ORDER_TYPE_SELL); //, Global.Price_Master,Global.Docker_total,Global.Point_Distance);
+                  }
                }
             }
+            //DEV_OneTick  = false;
          }
-         //DEV_OneTick  = false;
       }
    }
 //CMM += CMM_Dock_UP;

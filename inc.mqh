@@ -580,15 +580,18 @@ sProgram  Program;
 
 
 
-
-
-
-
-
-
-
-
-
+#include <Trade\Trade.mqh>
+CTrade Trade;
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool  OrderClose(ulong  position_ticket)
+{
+   if(PositionSelectByTicket(position_ticket)) {
+      return   Trade.PositionClosePartial(position_ticket, PositionGetDouble(POSITION_VOLUME));;
+   }
+   return   false;
+}
 
 
 
@@ -596,7 +599,7 @@ sProgram  Program;
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool  OrderClose(ulong  position_ticket)
+bool  OrderClose_2(ulong  position_ticket)
 {
    {
       if(!PositionSelectByTicket(position_ticket)) {
@@ -617,19 +620,50 @@ bool  OrderClose(ulong  position_ticket)
       request.symbol    = PositionGetString(POSITION_SYMBOL);         // symbol
       request.volume    = PositionGetDouble(POSITION_VOLUME);       // volume of the position
       request.deviation = 5;                       // allowed deviation from the price
-      request.magic     = 0;                       // MagicNumber of the position
+      request.magic     = PositionGetInteger(POSITION_MAGIC);                       // MagicNumber of the position
+
+
+      request.type_filling = ORDER_FILLING_RETURN;                          // Order execution type
+
       ENUM_POSITION_TYPE type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);  // type of the position
+
       //--- set the price and order type depending on the position type
 
       if(type == POSITION_TYPE_BUY) {
-         request.price = SymbolInfoDouble(request.symbol, SYMBOL_BID);
-         request.type = ORDER_TYPE_SELL;
-      }
-      if(type == POSITION_TYPE_SELL) {
-         request.price = SymbolInfoDouble(request.symbol, SYMBOL_ASK);
+         request.price = PositionGetDouble(POSITION_PRICE_CURRENT);     //SymbolInfoDouble(request.symbol, SYMBOL_BID);
          request.type = ORDER_TYPE_BUY;
       }
+      if(type == POSITION_TYPE_SELL) {
+         request.price =  PositionGetDouble(POSITION_PRICE_CURRENT);    //SymbolInfoDouble(request.symbol, SYMBOL_ASK);
+         request.type = ORDER_TYPE_SELL;
+      }
 
+      Print(__FUNCTION__, "#", __LINE__, " position_ticket :", position_ticket, " | PositionGetInt(POSITION_TICKET)", PositionGetInteger(POSITION_TICKET));
+      Print(__FUNCTION__, "#", __LINE__, " type :", type);
+
+      Print(__FUNCTION__, "#", __LINE__, " *SYMBOL_ASK :", SymbolInfoDouble(request.symbol, SYMBOL_ASK));
+      Print(__FUNCTION__, "#", __LINE__, " *SYMBOL_BID :", SymbolInfoDouble(request.symbol, SYMBOL_BID));
+      Print(__FUNCTION__, "#", __LINE__, " *OD_PP :", PositionGetDouble(POSITION_PRICE_OPEN));
+
+      {
+         Print(__FUNCTION__, "#", __LINE__, " #request.action:",  request.action );
+         Print(__FUNCTION__, "#", __LINE__, " #request.magic:",  request.magic );
+         Print(__FUNCTION__, "#", __LINE__, " #request.order:",  request.order );
+         Print(__FUNCTION__, "#", __LINE__, " #request.symbol:",  request.symbol );
+         Print(__FUNCTION__, "#", __LINE__, " #request.volume:",  request.volume );
+         Print(__FUNCTION__, "#", __LINE__, " #request.price:",  request.price );
+         Print(__FUNCTION__, "#", __LINE__, " #request.stoplimit:",  request.stoplimit );
+         Print(__FUNCTION__, "#", __LINE__, " #request.sl:",  request.sl );
+         Print(__FUNCTION__, "#", __LINE__, " #request.tp:",  request.tp );
+         Print(__FUNCTION__, "#", __LINE__, " #request.deviation:",  request.deviation );
+         Print(__FUNCTION__, "#", __LINE__, " #request.type:",  request.type );
+         Print(__FUNCTION__, "#", __LINE__, " #request.type_filling:",  request.type_filling );
+         Print(__FUNCTION__, "#", __LINE__, " #request.type_time:",  request.type_time );
+         Print(__FUNCTION__, "#", __LINE__, " #request.expiration:",  request.expiration );
+         Print(__FUNCTION__, "#", __LINE__, " #request.comment:",  request.comment );
+         Print(__FUNCTION__, "#", __LINE__, " #request.position:",  request.position );
+         Print(__FUNCTION__, "#", __LINE__, " #request.position_by:",  request.position_by );
+      }
       //--- output information about the closure
       PrintFormat("Close #%I64d %s %s", position_ticket, request.symbol, EnumToString(type));
       //--- send the request

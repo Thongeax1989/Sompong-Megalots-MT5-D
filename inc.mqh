@@ -72,6 +72,10 @@ input   color                exColor_clrSell  = clrTomato;   //• Master Price
 
 input   string               exPlaysound          = " --------------- Playsound  --------------- ";   // --------------------------------------------------
 input   bool                 exPlaysound_OnClose  = true;   //• OnClose
+
+input   string               exGUI     = " --------------- GUI  --------------- ";   // --------------------------------------------------
+input   bool                 exGUI_IO  = true;   //• On / Close
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

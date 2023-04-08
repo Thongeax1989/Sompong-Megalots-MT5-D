@@ -28,8 +28,14 @@ sGUI  GUI = {255, 150, 135, 35,
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void  GUI()
+bool  GUI()
 {
+   if(!exGUI_IO) {
+      return   false;
+   }
+   //---
+   //---
+
    Create_RectLabel("BG1");
    Create_RectLabel("BG2");
    Create_RectLabel("BG3");
@@ -86,7 +92,7 @@ void  GUI()
 
    double   Balance  =  AccountInfoDouble(ACCOUNT_BALANCE);
    double   Drawdown =  (Port.All.Sum_ActiveHold / Balance) * 100;
-   GUI_DrawPair("Spread", "Spread", "", IntegerToString(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)), "P");
+   GUI_DrawPair("Spread", "Spread", "", IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)), "P");
    GUI_DrawPair("Drawdown", "Drawdown", "", _CommaZero(Drawdown, _DigitsByValue(Drawdown)), "%", false, true, Drawdown);
    GUI_DrawPair("Balance", "Balance", "", _CommaZero(Balance, 2), "$");
    GUI_DrawPair("Equity", "Equity", "", _CommaZero(AccountInfoDouble(ACCOUNT_EQUITY), 2), "$");
@@ -121,8 +127,8 @@ void  GUI()
    Create_Button(EA_Identity_ShortGUI + "|PAUSE|0", TextRunning, GUI.column_1, GUI.Row_Save, BTN_wide, int(BTN_High * 1.25), clrWhite, clrRunning, clrNONE);
    GUI_DrawStepGroup(int(BTN_High * 1.25 + 10));
 
-   Create_Button(EA_Identity_ShortGUI + "|Close|0","Close Buy",GUI.column_1,GUI.Row_Save,int(BTN_wide * 0.495),BTN_High,clrWhite,clrBrown,clrNONE);
-   Create_Button(EA_Identity_ShortGUI + "|Close|1","Close Sell",int(GUI.column_1 - (BTN_wide * 0.505)),GUI.Row_Save,int(BTN_wide * 0.495),BTN_High,clrWhite,clrBrown,clrNONE);
+   Create_Button(EA_Identity_ShortGUI + "|Close|0", "Close Buy", GUI.column_1, GUI.Row_Save, int(BTN_wide * 0.495), BTN_High, clrWhite, clrBrown, clrNONE);
+   Create_Button(EA_Identity_ShortGUI + "|Close|1", "Close Sell", int(GUI.column_1 - (BTN_wide * 0.505)), GUI.Row_Save, int(BTN_wide * 0.495), BTN_High, clrWhite, clrBrown, clrNONE);
    GUI_DrawStepGroup(BTN_High + 3);
 
    Create_Button(EA_Identity_ShortGUI + "|Close|-1", "Close Order ALL", GUI.column_1, GUI.Row_Save, BTN_wide, BTN_High, clrWhite, clrBrown, clrNONE);
@@ -144,21 +150,21 @@ void  GUI()
       Comments.add("Program.Running ", Program.Running );
       Comments.newline();
 
-      Comments.add("Port.ActivePlace_TOP", DoubleToString(Port.docker.ActivePlace_TOP, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_TOP,0));
-      Comments.add("Port.ActivePlace_BOT", DoubleToString(Port.docker.ActivePlace_BOT, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_BOT,0));
+      Comments.add("Port.ActivePlace_TOP", DoubleToString(Port.docker.ActivePlace_TOP, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_TOP, 0));
+      Comments.add("Port.ActivePlace_BOT", DoubleToString(Port.docker.ActivePlace_BOT, _Digits) + " => " + DoubleToString(Port.docker.ActivePoint_BOT, 0));
       Comments.newline();
 
       Comments.add("Docker_total", Docker.Global.Docker_total, 0);
       Comments.add("Docker.Global.Price_Master", Docker.Global.Price_Master, _Digits);
       Comments.newline();
 
-      Comments.add("Buy",string(Port.Buy.CNT_Avtive) + " / " + string(Port.Buy.CNT_Pending) + " = " + DoubleToString(Port.Buy.Sum_ActiveHold,4));
-      Comments.add("Sell",string(Port.Sell.CNT_Avtive) + " / " + string(Port.Sell.CNT_Pending) + " = " + DoubleToString(Port.Sell.Sum_ActiveHold,4));
-      Comments.add("All",string(Port.All.CNT_Avtive) + " / " + string(Port.All.CNT_Pending) + " = " + DoubleToString(Port.All.Sum_ActiveHold,4));
+      Comments.add("Buy", string(Port.Buy.CNT_Avtive) + " / " + string(Port.Buy.CNT_Pending) + " = " + DoubleToString(Port.Buy.Sum_ActiveHold, 4));
+      Comments.add("Sell", string(Port.Sell.CNT_Avtive) + " / " + string(Port.Sell.CNT_Pending) + " = " + DoubleToString(Port.Sell.Sum_ActiveHold, 4));
+      Comments.add("All", string(Port.All.CNT_Avtive) + " / " + string(Port.All.CNT_Pending) + " = " + DoubleToString(Port.All.Sum_ActiveHold, 4));
       Comments.newline();
 
       {/* exStopLoss_Distance_IO */
-         Comments.add("StopLoss_Distance_IO",exStopLoss_Distance_IO);
+         Comments.add("StopLoss_Distance_IO", exStopLoss_Distance_IO);
          Comments.add("Port.ActivePlace_TOP", Port.docker.ActivePlace_TOP, _Digits);
          Comments.add("Port.ActivePlace_BOT", Port.docker.ActivePlace_BOT, _Digits);
          Comments.add("Port.Point_TOP", Port.docker.ActivePoint_TOP, _Digits);
@@ -171,6 +177,7 @@ void  GUI()
       Comments.Show();
    }
 
+   return   true;
 }
 //+------------------------------------------------------------------+
 //|                                                                  |

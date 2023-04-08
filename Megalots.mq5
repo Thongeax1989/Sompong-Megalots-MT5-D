@@ -58,6 +58,7 @@ int OnInit()
    Print(" ----------------------------------------------------------------------------------------- ");
 
    {
+      ChartSetInteger (0, CHART_SHOW_TRADE_LEVELS, false);
       ChartSetInteger(0, CHART_SHOW_GRID, false);
       //---
 
@@ -506,6 +507,8 @@ void OnTick()
                   Print(__FUNCTION__, __LINE__, " Port.All.CNT_Avtive : ", Port.All.CNT_Avtive);
 
                   DockerDefine();
+
+
 
                }
 

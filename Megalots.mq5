@@ -435,7 +435,9 @@ void OnTick()
                   OrderCloseAll(-1);
                   OrderDeleteAll(__LINE__);     //My Order
 
-                  Program.Running   =  false;
+                  if(exZone_PriceStart_Auto_IO && !exZone_PriceStart_Auto_IO_SL) {
+                     Program.Running   =  false;
+                  }
                   Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
 
                   OnClose           = true;
@@ -455,7 +457,10 @@ void OnTick()
                      OrderCloseAll(-1);
                      OrderDeleteAll(__LINE__);     //My Order
 
-                     Program.Running   =  false;
+                     if(exZone_PriceStart_Auto_IO && !exZone_PriceStart_Auto_IO_SL) {
+                        Program.Running   =  false;
+                     }
+
                      Print(__LINE__, "#", __FUNCTION__, " Program.Running : ", Program.Running);
 
                      OnClose           = true;
@@ -500,7 +505,7 @@ void OnTick()
       if(Program.Running) {
 
          {/*** Type D :: PriceStart_Auto ***/
-            if(OnClose && exZone_PriceStart_Auto) {
+            if(OnClose && exZone_PriceStart_Auto_IO) {
                //Print(__FUNCTION__, __LINE__, " OnClose : ", OnClose, " | exZone_PriceStart_Auto : ", exZone_PriceStart_Auto);
 
                if(Port.All.CNT_Avtive == 0) {

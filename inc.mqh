@@ -32,7 +32,14 @@ input   string               exOrder_1                =  ""; //-
 input   double               exZone_PriceStart        =  0;                //• Price Start (0 = Current of Bid Price)
 input   int                  exZone_Distance          =  50;               //• Distance
 input   ENUM_PlacePending    exZone_PPlaceMODE        =  E_PlaceHalfFrist; //• Pending Mode Place
-input   bool                 exZone_PriceStart_Auto   =  false;      //• ** PriceStart Auto by BID (When Close All)
+
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+input   string               exZone_PriceStart_Auto_        = " --------------- PriceStart #Auto (by BID)--------------- ";   // --------------------------------------------------
+input   bool                 exZone_PriceStart_Auto_IO      =  false;      //• When Close All
+input   bool                 exZone_PriceStart_Auto_IO_SL   =  false;      //• Stoplose
 
 input   string               exOrder1          = " --------------- Order : Group 1 --------------- ";   // --------------------------------------------------
 input   int                  exZone_CNT        =  2;                //• N Order
@@ -45,10 +52,10 @@ input   double               exOrder_Lot_Sel_2   =  0.01;           //• Lot Se
 input   double               exOrder_Lot_Buy_2   =  0.01;           //• Lot Buy
 
 input   string               exProfit                   =  " --------------- Take Profit --------------- ";   // --------------------------------------------------
-input   double               exProfit_TakeTraget        =  30;                  //• TP ($) : All
-input   ENUM_ProfitTake      exProfit_MODE              =  ENUM_ProfitTakeAll;  //• Mode
-input   double               exProfit_TakeTraget_SELL   =  30;                  //• TP ($) : Sell
-input   double               exProfit_TakeTraget_BUY_   =  30;                  //• TP ($) : Buy
+input   double               exProfit_TakeTraget        =  30;                      //• TP ($) : All
+input   ENUM_ProfitTake      exProfit_MODE              =  ENUM_ProfitTakeTypeD;    //• Mode
+input   double               exProfit_TakeTraget_SELL   =  30;                      //• TP ($) : Sell
+input   double               exProfit_TakeTraget_BUY_   =  30;                      //• TP ($) : Buy
 
 input   string               exStopLoss              =  " --------------- Stop Loss --------------- ";   // --------------------------------------------------
 input   string               exStopLoss_EQ           =  ".";                 //--------------- Equity ---------------
@@ -74,7 +81,7 @@ input   string               exPlaysound          = " --------------- Playsound 
 input   bool                 exPlaysound_OnClose  = true;   //• OnClose
 
 input   string               exGUI     = " --------------- GUI  --------------- ";   // --------------------------------------------------
-input   bool                 exGUI_IO  = true;   //• On / Close
+input   bool                 exGUI_IO  = true;   //• On
 
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -592,6 +599,8 @@ CTrade Trade;
 bool  OrderClose(ulong  position_ticket)
 {
    if(PositionSelectByTicket(position_ticket)) {
+      if (SymbolInfoInteger(_Symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL )
+         return   false;
       return   Trade.PositionClosePartial(position_ticket, PositionGetDouble(POSITION_VOLUME));;
    }
    return   false;
@@ -847,6 +856,11 @@ bool  OrderDeleteAll(int  CommandByLine)
    if(CommandByLine != -1) {
       Print(__FUNCTION__, "#", __LINE__, " CommandByLine ", CommandByLine);
    }
+
+   {
+      if (SymbolInfoInteger(_Symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL )
+         return   false;
+   }
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */
@@ -916,6 +930,11 @@ bool  OrderDeleteAll(int  CommandByLine)
 //+------------------------------------------------------------------+
 bool  OrderCloseAll(ENUM_POSITION_TYPE OP_DIR)
 {
+
+   {
+      if (SymbolInfoInteger(_Symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL )
+         return   false;
+   }
    /* Funtion */
    int   CountOfBox = 0;
    /* Funtion# */

@@ -31,10 +31,23 @@ sGUI  GUI = {255, 150, 135, 35,
 bool  GUI()
 {
    if(!exGUI_IO) {
+
+      if(false) {
+         long  TRADE_EXEMODE  =  SymbolInfoInteger(Symbol(), SYMBOL_TRADE_EXEMODE);
+         long  TRADE_MODE  =  SymbolInfoInteger(Symbol(), SYMBOL_TRADE_MODE);
+
+         string   sms = "";
+
+         sms   += "TRADE_EXEMODE: " + TRADE_EXEMODE + "\n";
+         sms   += "TRADE_MODE: " + TRADE_MODE + "\n";
+
+         Comment(sms);
+      }
+
       return   false;
    }
-   //---
-   //---
+//---
+//---
 
    Create_RectLabel("BG1");
    Create_RectLabel("BG2");

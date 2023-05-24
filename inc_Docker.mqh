@@ -202,7 +202,7 @@ public:
 
    void              Docker_ObjDrawing()
    {
-      bool  ShowGuide  = true;
+      bool  ShowGuide  = false;
 //---
       color  clrMaster = exColor_clrMaster, clrBuy =  exColor_clrBuy, clrSell =  exColor_clrSell;
 //---
@@ -227,7 +227,6 @@ public:
 
          //--- Group Bot
          if(ShowGuide)
-
             HLineCreate("Docker[" + string(i + 1) + "].Price_BOT_UP", Docker[i].Price_BOT_UP, clrBuy, IsShowPrice);
          //
          if(i != Global.Docker_total - 1) {
